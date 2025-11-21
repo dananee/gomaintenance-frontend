@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ArrowUpDown,
   CalendarClock,
@@ -10,14 +10,20 @@ import {
   Plus,
 } from "lucide-react";
 
-import {
-  WorkOrdersKanban,
-  WorkOrderCard,
-} from "@/components/work-orders-kanban";
+import { WorkOrdersKanban, WorkOrderCard } from "@/components/work-orders-kanban";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   Table,
   TableBody,
@@ -28,10 +34,10 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const sampleBoard: Record<
-  "new" | "in_progress" | "in_review" | "completed",
-  WorkOrderCard[]
-> = {
+const columnKeys = ["new", "in_progress", "in_review", "completed"] as const;
+type ColumnKey = (typeof columnKeys)[number];
+
+const sampleBoard: Record<ColumnKey, WorkOrderCard[]> = {
   new: [
     {
       id: "WO-3021",
@@ -102,17 +108,81 @@ const sampleBoard: Record<
 export default function WorkOrdersPage() {
   const [board, setBoard] = useState(sampleBoard);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | ColumnKey>("all");
+  const [priorityFilter, setPriorityFilter] = useState<"all" | WorkOrderCard["priority"]>("all");
+  const [newOrderOpen, setNewOrderOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [newOrder, setNewOrder] = useState({
+    title: "",
+    vehicle: "",
+    priority: "medium" as WorkOrderCard["priority"],
+    assignee: "Unassigned",
+  });
+
+  const filterItem = useCallback(
+    (item: WorkOrderCard, columnKey: ColumnKey) => {
+      if (statusFilter !== "all" && statusFilter !== columnKey) return false;
+      if (priorityFilter !== "all" && priorityFilter !== item.priority) return false;
+      const haystack = `${item.code} ${item.vehicle} ${item.title} ${item.assignee}`.toLowerCase();
+      return haystack.includes(search.toLowerCase());
+    },
+    [priorityFilter, search, statusFilter]
+  );
+
+  const filteredBoard = useMemo(
+    () =>
+      Object.fromEntries(
+        columnKeys.map((column) => [
+          column,
+          board[column].filter((item) => filterItem(item, column)),
+        ])
+      ) as Record<ColumnKey, WorkOrderCard[]>,
+    [board, filterItem]
+  );
+
   const tableRows = useMemo(
     () =>
-      Object.values(board)
-        .flat()
-        .filter((row) =>
-          `${row.code} ${row.vehicle} ${row.title}`
-            .toLowerCase()
-            .includes(search.toLowerCase())
-        ),
-    [board, search]
+      columnKeys.flatMap((column) =>
+        board[column]
+          .filter((row) => filterItem(row, column))
+          .map((row) => ({ ...row, status: column }))
+      ),
+    [board, filterItem]
   );
+
+  const handleBoardChange = (nextBoard: Record<ColumnKey, WorkOrderCard[]>) => {
+    setBoard((prev) => {
+      const hidden = columnKeys.reduce<Record<ColumnKey, WorkOrderCard[]>>((acc, column) => {
+        acc[column] = prev[column].filter((item) => !filterItem(item, column));
+        return acc;
+      }, { new: [], in_progress: [], in_review: [], completed: [] });
+
+      return columnKeys.reduce<Record<ColumnKey, WorkOrderCard[]>>((acc, column) => {
+        acc[column] = [...nextBoard[column], ...hidden[column]];
+        return acc;
+      }, { new: [], in_progress: [], in_review: [], completed: [] });
+    });
+  };
+
+  const createNewOrder = () => {
+    const id = `WO-${Math.floor(Math.random() * 9000 + 1000)}`;
+    const card: WorkOrderCard = {
+      id,
+      code: `#${id}`,
+      title: newOrder.title || "New maintenance order",
+      vehicle: newOrder.vehicle || "Unassigned vehicle",
+      priority: newOrder.priority,
+      assignee: newOrder.assignee || "Unassigned",
+      comments: 0,
+    };
+
+    setBoard((prev) => ({
+      ...prev,
+      new: [card, ...prev.new],
+    }));
+    setNewOrder({ title: "", vehicle: "", priority: "medium", assignee: "Unassigned" });
+    setNewOrderOpen(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -125,14 +195,22 @@ export default function WorkOrdersPage() {
           <span className="hidden text-xs text-gm-muted md:inline">Updated 3 minutes ago</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" size="sm" className="gap-2 border-gm-border text-foreground">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-gm-border text-foreground"
+            onClick={() => setFiltersOpen(true)}
+          >
             <Filter className="h-4 w-4" /> Filters
           </Button>
           <Button variant="outline" size="sm" className="gap-2 border-gm-border text-foreground">
             <CalendarClock className="h-4 w-4" />
             Plan calendar
           </Button>
-          <Button className="gap-2 bg-gm-primary text-black hover:bg-gm-primary/90">
+          <Button
+            className="gap-2 bg-gm-primary text-black hover:bg-gm-primary/90"
+            onClick={() => setNewOrderOpen(true)}
+          >
             <Plus className="h-4 w-4" /> New work order
           </Button>
         </div>
@@ -162,7 +240,7 @@ export default function WorkOrdersPage() {
         </div>
 
         <TabsContent value="kanban" className="space-y-4">
-          <WorkOrdersKanban items={board} onChange={setBoard} />
+          <WorkOrdersKanban items={filteredBoard} onChange={handleBoardChange} />
         </TabsContent>
 
         <TabsContent value="table">
@@ -191,7 +269,9 @@ export default function WorkOrdersPage() {
                         {row.priority}
                       </Badge>
                     </TableCell>
-                    <TableCell className="capitalize text-gm-muted">{findStatus(row.id)}</TableCell>
+                    <TableCell className="capitalize text-gm-muted">
+                      {row.status.replace("_", " ")}
+                    </TableCell>
                     <TableCell className="text-right text-gm-muted">
                       {row.comments ?? 0}
                     </TableCell>
@@ -202,15 +282,143 @@ export default function WorkOrdersPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={newOrderOpen} onOpenChange={setNewOrderOpen}>
+        <DialogContent className="bg-gm-card text-foreground">
+          <DialogHeader>
+            <DialogTitle>Create work order</DialogTitle>
+          </DialogHeader>
+
+          <div className="grid gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="order-title">Title</Label>
+              <Input
+                id="order-title"
+                value={newOrder.title}
+                onChange={(event) => setNewOrder((prev) => ({ ...prev, title: event.target.value }))}
+                placeholder="Replace brake pads and bleed system"
+                className="border-gm-border bg-gm-panel"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="order-vehicle">Vehicle</Label>
+              <Input
+                id="order-vehicle"
+                value={newOrder.vehicle}
+                onChange={(event) => setNewOrder((prev) => ({ ...prev, vehicle: event.target.value }))}
+                placeholder="Ford Transit • 58k km"
+                className="border-gm-border bg-gm-panel"
+              />
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="order-priority">Priority</Label>
+                <select
+                  id="order-priority"
+                  value={newOrder.priority}
+                  onChange={(event) =>
+                    setNewOrder((prev) => ({
+                      ...prev,
+                      priority: event.target.value as WorkOrderCard["priority"],
+                    }))
+                  }
+                  className="h-10 rounded-lg border border-gm-border bg-gm-panel px-3 text-sm"
+                >
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-assignee">Assignee</Label>
+                <Input
+                  id="order-assignee"
+                  value={newOrder.assignee}
+                  onChange={(event) => setNewOrder((prev) => ({ ...prev, assignee: event.target.value }))}
+                  placeholder="Alex Johnson"
+                  className="border-gm-border bg-gm-panel"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <Button variant="ghost" onClick={() => setNewOrderOpen(false)} className="text-gm-muted">
+              Cancel
+            </Button>
+            <Button className="bg-gm-primary text-black hover:bg-gm-primary/90" onClick={createNewOrder}>
+              Add work order
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+        <SheetContent className="bg-gm-card text-foreground">
+          <SheetHeader className="pb-2">
+            <SheetTitle>Filters</SheetTitle>
+            <p className="text-sm text-gm-muted">Refine the Kanban board and table views.</p>
+          </SheetHeader>
+
+          <div className="space-y-4 p-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {["all", ...columnKeys].map((status) => (
+                  <Button
+                    key={status}
+                    variant={statusFilter === status ? "default" : "outline"}
+                    className={`justify-start ${statusFilter === status ? "bg-gm-primary text-black" : "border-gm-border"}`}
+                    onClick={() => setStatusFilter(status as typeof statusFilter)}
+                  >
+                    {status === "all" ? "All" : status.replace("_", " ")}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {["all", "high", "medium", "low"].map((priority) => (
+                  <Button
+                    key={priority}
+                    variant={priorityFilter === priority ? "default" : "outline"}
+                    className={`justify-start ${
+                      priorityFilter === priority ? "bg-gm-primary text-black" : "border-gm-border"
+                    }`}
+                    onClick={() =>
+                      setPriorityFilter(priority as typeof priorityFilter)
+                    }
+                  >
+                    {priority === "all" ? "All" : priority}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <SheetFooter className="flex-row items-center justify-between border-t border-gm-border bg-gm-panel/40">
+            <Button
+              variant="ghost"
+              className="text-gm-muted"
+              onClick={() => {
+                setStatusFilter("all");
+                setPriorityFilter("all");
+                setFiltersOpen(false);
+              }}
+            >
+              Clear filters
+            </Button>
+            <Button onClick={() => setFiltersOpen(false)} className="bg-gm-primary text-black hover:bg-gm-primary/90">
+              Apply
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 
-  function findStatus(id: string | number) {
-    const entry = Object.entries(board).find(([, items]) =>
-      items.some((item) => item.id === id)
-    );
-    return entry ? entry[0].replace("_", " ") : "";
-  }
 }
 
 function priorityTone(priority: WorkOrderCard["priority"]) {

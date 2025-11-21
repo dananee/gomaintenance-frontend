@@ -1,7 +1,7 @@
 "use client";
 
 import { apiFetch } from "@/lib/api-client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type User = {
   id: number;
@@ -22,15 +22,38 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored =
-      typeof window !== "undefined" ? localStorage.getItem("gm_user") : null;
-    return stored ? (JSON.parse(stored) as User) : null;
-  });
-  const [token, setToken] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("gm_token") : null
-  );
-  const [loading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (typeof window === "undefined") return;
+
+    const storedToken = localStorage.getItem("gm_token");
+    const storedUser = localStorage.getItem("gm_user");
+
+    let parsedUser: User | null = null;
+    if (storedUser) {
+      try {
+        parsedUser = JSON.parse(storedUser) as User;
+      } catch (error) {
+        console.warn("Failed to parse stored user, clearing session", error);
+        localStorage.removeItem("gm_user");
+      }
+    }
+
+    if (storedToken) {
+      setToken(storedToken);
+    }
+    if (parsedUser) {
+      setUser(parsedUser);
+    }
+
+    setLoading(false);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
 
   const persist = (t: string, u: User) => {
     setToken(t);

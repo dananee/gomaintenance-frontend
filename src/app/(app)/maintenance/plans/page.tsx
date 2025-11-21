@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Plus, Wrench, ClipboardList, Save, Trash2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,8 @@ export default function MaintenancePlansPage() {
     () => `${templates.length} active templates`,
     [templates.length]
   );
+  const formRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="space-y-6">
@@ -52,7 +54,20 @@ export default function MaintenancePlansPage() {
               <p className="text-sm font-semibold text-foreground">Template library</p>
               <p className="text-xs text-gm-muted">{coverage}</p>
             </div>
-            <Button className="gap-2 bg-gm-primary text-black hover:bg-gm-primary/90">
+            <Button
+              className="gap-2 bg-gm-primary text-black hover:bg-gm-primary/90"
+              onClick={() => {
+                setDraft({
+                  name: "",
+                  interval: "30 days",
+                  vehicles: "All",
+                  operations: "",
+                  parts: "",
+                });
+                formRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => nameInputRef.current?.focus(), 150);
+              }}
+            >
               <Plus className="h-4 w-4" /> New template
             </Button>
           </div>
@@ -133,7 +148,7 @@ export default function MaintenancePlansPage() {
           </div>
         </Card>
 
-        <Card className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
+        <Card ref={formRef} className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
           <Tabs defaultValue="details">
             <TabsList className="grid grid-cols-2 rounded-xl bg-gm-panel">
               <TabsTrigger value="details">Template</TabsTrigger>
@@ -144,6 +159,7 @@ export default function MaintenancePlansPage() {
               <Input
                 placeholder="Template name"
                 value={draft.name}
+                ref={nameInputRef}
                 onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
                 className="border-gm-border bg-gm-panel text-foreground"
               />
