@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { apiFetch } from "@/lib/api-client";
 
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
-import { SiteHeader } from "@/components/site-header";
+import { useAuth } from "@/hooks/useAuth";
+import { apiFetch } from "@/lib/api-client";
 
 // ---- Types matching your Go API (adjust if needed) ----
 
@@ -55,7 +54,7 @@ type ChartPoint = {
 };
 
 export default function DashboardPage() {
-  const { token, user } = useAuth();
+  const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -170,38 +169,28 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col">
-      <SiteHeader
-        title="Dashboard"
-        description="Monitor fleet health and maintenance activity."
-        userName={user?.full_name ?? "User"}
-      />
-
-      <div className="flex-1 space-y-8 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
-        {error && (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
-            {error}
-          </div>
-        )}
-
-        {/* Top stats cards */}
-        <SectionCards cards={stats} loading={loading} />
-
-        {/* Chart + table layout */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-          <ChartAreaInteractive
-            title="Work orders per day"
-            description="New maintenance orders created over time."
-            data={chartData}
-            loading={loading}
-          />
-          <DataTable
-            title="Recent work orders"
-            description="Latest maintenance activity across your fleet."
-            data={tableData}
-            loading={loading}
-          />
+    <div className="space-y-8">
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
+          {error}
         </div>
+      )}
+
+      <SectionCards cards={stats} loading={loading} />
+
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <ChartAreaInteractive
+          title="Work orders per day"
+          description="New maintenance orders created over time."
+          data={chartData}
+          loading={loading}
+        />
+        <DataTable
+          title="Recent work orders"
+          description="Latest maintenance activity across your fleet."
+          data={tableData}
+          loading={loading}
+        />
       </div>
     </div>
   );
