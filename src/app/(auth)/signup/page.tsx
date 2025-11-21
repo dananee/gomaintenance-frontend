@@ -25,7 +25,7 @@ export default function SignupPage() {
     try {
       await signup(email, fullName, password);
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch {
       setError("Unable to sign up (email might be used or password too short)");
     } finally {
       setLoading(false);
