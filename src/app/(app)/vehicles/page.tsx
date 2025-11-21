@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -36,17 +41,17 @@ export default function VehiclesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [draft, setDraft] = useState<Omit<Vehicle, "id" | "status"> & { status?: string }>(
-    {
-      name: "",
-      plate_number: "",
-      brand: "",
-      model: "",
-      year: new Date().getFullYear(),
-      current_odometer: 0,
-      status: "active",
-    }
-  );
+  const [draft, setDraft] = useState<
+    Omit<Vehicle, "id" | "status"> & { status?: string }
+  >({
+    name: "",
+    plate_number: "",
+    brand: "",
+    model: "",
+    year: new Date().getFullYear(),
+    current_odometer: 0,
+    status: "active",
+  });
 
   useEffect(() => {
     if (!token) return;
@@ -89,8 +94,8 @@ export default function VehiclesPage() {
         description="All vehicles synced from your GoMaintenance backend."
       />
 
-      <main className="flex-1 p-4 md:p-6 lg:p-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <main className="flex-1 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4">
           {error && (
             <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
               {error}
@@ -100,8 +105,12 @@ export default function VehiclesPage() {
           <Card className="w-full rounded-2xl border-gm-border bg-gm-card px-4 py-4 md:px-6 md:py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold text-foreground">Fleet inventory</p>
-                <p className="text-xs text-gm-muted">{vehicles.length} vehicles loaded</p>
+                <p className="text-sm font-semibold text-foreground">
+                  Fleet inventory
+                </p>
+                <p className="text-xs text-gm-muted">
+                  {vehicles.length} vehicles loaded
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -151,7 +160,8 @@ export default function VehiclesPage() {
                         colSpan={8}
                         className="h-24 text-center text-sm text-gm-muted"
                       >
-                        No vehicles found. Make sure your backend <code>/vehicles</code> returns a list.
+                        No vehicles found. Make sure your backend{" "}
+                        <code>/vehicles</code> returns a list.
                       </TableCell>
                     </TableRow>
                   )}
@@ -160,9 +170,15 @@ export default function VehiclesPage() {
                     vehicles.length > 0 &&
                     vehicles.map((v) => (
                       <TableRow key={v.id}>
-                        <TableCell className="font-mono text-xs">{v.id}</TableCell>
-                        <TableCell className="whitespace-nowrap">{v.name}</TableCell>
-                        <TableCell className="whitespace-nowrap">{v.plate_number || "-"}</TableCell>
+                        <TableCell className="font-mono text-xs">
+                          {v.id}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {v.name}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {v.plate_number || "-"}
+                        </TableCell>
                         <TableCell>{v.brand || "-"}</TableCell>
                         <TableCell>{v.model || "-"}</TableCell>
                         <TableCell>{v.year || "-"}</TableCell>
@@ -186,7 +202,10 @@ export default function VehiclesPage() {
             <div className="mt-4 grid gap-3 md:hidden">
               {loading &&
                 Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-24 rounded-xl border border-gm-border/60 bg-gm-border/20 animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-24 rounded-xl border border-gm-border/60 bg-gm-border/20 animate-pulse"
+                  />
                 ))}
               {!loading &&
                 vehicles.map((v) => (
@@ -217,7 +236,9 @@ export default function VehiclesPage() {
               <label className="text-gm-muted">Name</label>
               <Input
                 value={draft.name}
-                onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, name: e.target.value }))
+                }
                 className="border-gm-border bg-gm-panel text-foreground"
               />
             </div>
@@ -226,7 +247,9 @@ export default function VehiclesPage() {
                 <label className="text-gm-muted">Plate</label>
                 <Input
                   value={draft.plate_number ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, plate_number: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, plate_number: e.target.value }))
+                  }
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
@@ -234,7 +257,9 @@ export default function VehiclesPage() {
                 <label className="text-gm-muted">Brand</label>
                 <Input
                   value={draft.brand ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, brand: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, brand: e.target.value }))
+                  }
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
@@ -244,7 +269,9 @@ export default function VehiclesPage() {
                 <label className="text-gm-muted">Model</label>
                 <Input
                   value={draft.model ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, model: e.target.value }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, model: e.target.value }))
+                  }
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
@@ -253,7 +280,9 @@ export default function VehiclesPage() {
                 <Input
                   type="number"
                   value={draft.year ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, year: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, year: Number(e.target.value) }))
+                  }
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
@@ -262,7 +291,12 @@ export default function VehiclesPage() {
                 <Input
                   type="number"
                   value={draft.current_odometer ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, current_odometer: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setDraft((d) => ({
+                      ...d,
+                      current_odometer: Number(e.target.value),
+                    }))
+                  }
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>

@@ -10,7 +10,10 @@ import {
   Plus,
 } from "lucide-react";
 
-import { WorkOrdersKanban, WorkOrderCard } from "@/components/work-orders-kanban";
+import {
+  WorkOrdersKanban,
+  WorkOrderCard,
+} from "@/components/work-orders-kanban";
 import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -113,13 +116,13 @@ export default function WorkOrdersPage() {
   );
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <SiteHeader
         title="Work Orders"
         description="Prioritize, assign, and track maintenance tasks across the fleet."
       />
 
-      <main className="flex-1 space-y-6 p-4 md:p-6 lg:p-8">
+      <main className="flex-1 space-y-6 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10">
         <div className="flex flex-col gap-3 rounded-2xl border border-gm-border bg-gm-card/40 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-2 text-sm text-gm-muted">
             <Badge className="rounded-full bg-gm-primary/10 text-gm-primary">
@@ -133,10 +136,18 @@ export default function WorkOrdersPage() {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2 border-gm-border text-foreground">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-gm-border text-foreground"
+            >
               <Filter className="h-4 w-4" /> Filters
             </Button>
-            <Button variant="outline" size="sm" className="gap-2 border-gm-border text-foreground">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-gm-border text-foreground"
+            >
               <CalendarClock className="h-4 w-4" />
               Plan calendar
             </Button>
@@ -163,7 +174,11 @@ export default function WorkOrdersPage() {
                 placeholder="Search work orders"
                 className="rounded-xl border-gm-border bg-gm-card text-sm text-foreground"
               />
-              <Button variant="outline" size="icon" className="border-gm-border text-gm-muted">
+              <Button
+                variant="outline"
+                size="icon"
+                className="border-gm-border text-gm-muted"
+              >
                 <ArrowUpDown className="h-4 w-4" />
               </Button>
             </div>
@@ -189,18 +204,30 @@ export default function WorkOrdersPage() {
                 <TableBody>
                   {tableRows.map((row) => (
                     <TableRow key={row.id} className="hover:bg-gm-panel">
-                      <TableCell className="font-semibold text-foreground">{row.code}</TableCell>
-                      <TableCell className="text-gm-muted">{row.vehicle}</TableCell>
-                      <TableCell className="text-gm-muted">{row.title}</TableCell>
+                      <TableCell className="font-semibold text-foreground">
+                        {row.code}
+                      </TableCell>
+                      <TableCell className="text-gm-muted">
+                        {row.vehicle}
+                      </TableCell>
+                      <TableCell className="text-gm-muted">
+                        {row.title}
+                      </TableCell>
                       <TableCell>
                         <Badge
-                          className={`rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-wide ${priorityTone(row.priority)}`}
+                          className={`rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-wide ${priorityTone(
+                            row.priority
+                          )}`}
                         >
                           {row.priority}
                         </Badge>
                       </TableCell>
-                      <TableCell className="capitalize text-gm-muted">{findStatus(row.id)}</TableCell>
-                      <TableCell className="text-right text-gm-muted">{row.comments ?? 0}</TableCell>
+                      <TableCell className="capitalize text-gm-muted">
+                        {findStatus(row.id)}
+                      </TableCell>
+                      <TableCell className="text-right text-gm-muted">
+                        {row.comments ?? 0}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -209,17 +236,21 @@ export default function WorkOrdersPage() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </>
   );
 
   function findStatus(id: string | number) {
-    const entry = Object.entries(board).find(([, items]) => items.some((item) => item.id === id));
+    const entry = Object.entries(board).find(([, items]) =>
+      items.some((item) => item.id === id)
+    );
     return entry ? entry[0].replace("_", " ") : "";
   }
 }
 
 function priorityTone(priority: WorkOrderCard["priority"]) {
-  if (priority === "high") return "bg-red-500/15 text-red-200 border-red-500/40";
-  if (priority === "medium") return "bg-amber-500/15 text-amber-200 border-amber-500/40";
+  if (priority === "high")
+    return "bg-red-500/15 text-red-200 border-red-500/40";
+  if (priority === "medium")
+    return "bg-amber-500/15 text-amber-200 border-amber-500/40";
   return "bg-emerald-500/15 text-emerald-200 border-emerald-500/40";
 }

@@ -2,16 +2,20 @@
 
 import type { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar"; // ⬅️ named export from shadcn block
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen bg-transparent text-foreground">
+    <SidebarProvider defaultOpen={true}>
+      {/* Main container - flex row layout */}
+      <div className="flex min-h-screen w-full flex-row bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5]">
+        {/* Sidebar - fixed on left */}
         <AppSidebar />
-        <div className="flex flex-1 flex-col bg-gradient-to-br from-[#f8fbff]/80 via-[#eef2f8]/70 to-[#e5ebf5]/80">
+        
+        {/* Main content area - takes remaining space */}
+        <main className="flex min-h-screen w-full flex-1 flex-col md:ml-[var(--sidebar-width)]">
           {children}
-        </div>
+        </main>
       </div>
     </SidebarProvider>
   );
