@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
@@ -19,14 +19,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("demo1234");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  const gradientOverlay = useMemo(
-    () =>
-      "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.32) 0, rgba(255,255,255,0) 35%), " +
-      "radial-gradient(circle at 80% 10%, rgba(255,255,255,0.24) 0, rgba(255,255,255,0) 30%), " +
-      "radial-gradient(circle at 50% 80%, rgba(255,255,255,0.2) 0, rgba(255,255,255,0) 28%)",
-    []
-  );
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,17 +41,17 @@ export default function LoginPage() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="flex min-h-[680px] overflow-hidden rounded-3xl border bg-card shadow-2xl md:min-h-[760px]"
+      className="flex min-h-screen flex-col bg-background md:flex-row"
     >
-      <div className="flex w-full flex-col justify-between bg-background px-8 py-8 md:w-[56%] md:px-12 md:py-12">
-        <div className="flex items-center justify-between gap-4">
+      <div className="flex w-full flex-col justify-center px-8 py-12 md:max-w-xl md:px-12 lg:px-16">
+        <div className="mb-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-sm font-extrabold text-primary-foreground shadow-md">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-base font-extrabold text-primary-foreground shadow-sm ring-1 ring-border/40">
               GM
             </div>
             <div className="space-y-1">
-              <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">Maintenance cloud</p>
-              <p className="text-xl font-semibold">Welcome back</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Maintenance cloud</p>
+              <p className="text-lg font-semibold text-foreground">Welcome back</p>
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
@@ -70,15 +62,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="max-w-xl space-y-8">
+        <div className="space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-semibold">Sign in to GoMaintenance</h1>
-            <p className="text-sm text-muted-foreground">
-              Access your dashboard, track assets, and keep maintenance running smoothly.
-            </p>
+            <p className="text-base text-muted-foreground">Access your dashboard and assets.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -87,7 +77,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@company.com"
-                className="h-11 rounded-xl border-border bg-background"
+                className="h-12 rounded-xl border-border bg-card"
                 required
               />
             </div>
@@ -100,48 +90,49 @@ export default function LoginPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-xl border-border bg-background"
+                className="h-12 rounded-xl border-border bg-card"
                 required
               />
             </div>
 
-            {error && <p className="text-sm font-medium text-red-500">{error}</p>}
+            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
             <Button
               type="submit"
-              className="w-full rounded-xl bg-primary text-primary-foreground shadow-lg hover:shadow-xl"
+              className="h-12 w-full rounded-xl bg-primary text-primary-foreground shadow-sm hover:shadow-md"
               disabled={submitting || authLoading}
             >
-              {submitting ? "Signing in..." : "Sign in"}
+              {submitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>
+
+          <div className="pt-2 text-sm text-muted-foreground">
+            Forgot Password? <Link className="font-semibold text-primary" href="#">Reset</Link>
+          </div>
         </div>
 
-        <div className="text-xs text-muted-foreground">
-          Use demo credentials <span className="font-semibold text-foreground">demo@gomaintenance.io / demo1234</span> to
-          explore the platform.
+        <div className="pt-6 text-xs text-muted-foreground">
+          Use demo credentials <span className="font-semibold text-foreground">demo@gomaintenance.io / demo1234</span> to explore the platform.
         </div>
       </div>
 
-      <div className="relative hidden flex-1 overflow-hidden bg-gradient-to-br from-sky-600 via-sky-500 to-sky-400 md:block">
-        <div className="absolute inset-0" style={{ backgroundImage: gradientOverlay }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-sky-900/40 via-sky-900/20 to-transparent" />
-        <div className="absolute inset-0 mix-blend-soft-light" style={{ backgroundImage: "linear-gradient(120deg, rgba(255,255,255,0.06) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.06) 75%, transparent 75%, transparent)", backgroundSize: "40px 40px" }} />
-        <div className="relative flex h-full flex-col justify-between p-10 text-white">
-          <div className="flex items-center gap-3 text-sm font-medium opacity-90">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 text-lg font-bold backdrop-blur-sm">GM</span>
-            <span>Trusted maintenance platform for modern teams</span>
+      <div className="relative hidden flex-1 items-center justify-center bg-gradient-to-br from-[#0080ff] via-[#0068d6] to-[#0049a7] p-16 text-white md:flex">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 mix-blend-overlay" />
+        <div className="relative flex max-w-lg flex-col items-center text-center">
+          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-lg font-semibold backdrop-blur ring-1 ring-white/20">
+            GM
           </div>
-
-          <div className="relative mt-auto w-full max-w-sm self-end">
-            <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
-            <div className="absolute -bottom-16 -right-16 h-36 w-36 rounded-full bg-sky-300/25 blur-3xl" />
+          <h2 className="text-2xl font-semibold">Trusted maintenance platform</h2>
+          <p className="mt-2 max-w-md text-base opacity-80">
+            Modern maintenance and fleet operations with real-time visibility.
+          </p>
+          <div className="mt-10 w-full max-w-md overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-4 shadow-2xl backdrop-blur">
             <Image
               src="/window.svg"
               alt="Maintenance dashboard preview"
               width={520}
               height={420}
-              className="relative w-full rounded-2xl border border-white/20 bg-white/15 p-4 shadow-2xl backdrop-blur"
+              className="w-full rounded-xl bg-white/5"
               priority
             />
           </div>

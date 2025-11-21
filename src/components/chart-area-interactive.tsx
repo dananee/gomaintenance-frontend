@@ -25,13 +25,13 @@ export function ChartAreaInteractive({
   // (you can later swap to Recharts if you want)
   if (loading) {
     return (
-      <Card className="rounded-2xl border-gm-border bg-gm-card/60">
+      <Card className="rounded-xl border-border bg-card">
         <CardHeader>
-          <div className="h-6 w-32 animate-pulse rounded bg-gm-border" />
-          <div className="mt-2 h-4 w-48 animate-pulse rounded bg-gm-border" />
+          <div className="h-6 w-32 animate-pulse rounded bg-muted/60" />
+          <div className="mt-2 h-4 w-48 animate-pulse rounded bg-muted/60" />
         </CardHeader>
         <CardContent>
-          <div className="h-40 animate-pulse rounded-xl bg-gm-border/60" />
+          <div className="h-40 animate-pulse rounded-xl bg-muted/50" />
         </CardContent>
       </Card>
     );
@@ -60,14 +60,14 @@ export function ChartAreaInteractive({
       : `M0 ${height} L${width} ${height} L${width} ${height} Z`;
 
   return (
-    <Card className="rounded-2xl border-gm-border bg-gm-card">
+    <Card className="rounded-xl border-border bg-card shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
-        {description && <p className="text-xs text-gm-muted">{description}</p>}
+        <CardTitle className="text-sm font-semibold text-foreground">{title}</CardTitle>
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="flex h-40 items-center justify-center text-xs text-gm-muted">
+          <div className="flex h-40 items-center justify-center text-xs text-muted-foreground">
             No data yet. Create some work orders to see activity.
           </div>
         ) : (
