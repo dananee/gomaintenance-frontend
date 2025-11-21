@@ -69,7 +69,8 @@ export function AppSidebar() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const animationId = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(animationId);
   }, []);
 
   // Use consistent fallback during SSR/hydration
