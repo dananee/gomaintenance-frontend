@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { usePathname } from "next/navigation";
-import { Bell, Menu, Search, Sparkles } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Bell, LogOut, Menu, Search, Sparkles } from "lucide-react";
 
 import { routeMeta } from "./navigation";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 type AppNavbarProps = {
@@ -23,7 +24,8 @@ type AppNavbarProps = {
 
 export function AppNavbar({ onOpenSidebar }: AppNavbarProps) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuth();
 
   const currentMeta = useMemo(() => {
     return (
@@ -87,6 +89,8 @@ export function AppNavbar({ onOpenSidebar }: AppNavbarProps) {
             Quick action
           </Button>
 
+          <ThemeToggle />
+
           <Button
             size="icon"
             variant="ghost"
@@ -119,7 +123,16 @@ export function AppNavbar({ onOpenSidebar }: AppNavbarProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem className={cn("cursor-pointer rounded-lg px-3 py-2")}>Profile</DropdownMenuItem>
               <DropdownMenuItem className={cn("cursor-pointer rounded-lg px-3 py-2")}>Settings</DropdownMenuItem>
-              <DropdownMenuItem className={cn("cursor-pointer rounded-lg px-3 py-2 text-destructive")}>Sign out</DropdownMenuItem>
+              <DropdownMenuItem
+                className={cn("cursor-pointer rounded-lg px-3 py-2 text-destructive")}
+                onSelect={() => {
+                  logout();
+                  router.replace("/login");
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
