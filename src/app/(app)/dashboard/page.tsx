@@ -170,14 +170,14 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col gap-6">
       <SiteHeader
         title="Dashboard"
         description="Monitor fleet health and maintenance activity."
         userName={user?.full_name ?? "User"}
       />
 
-      <div className="flex-1 space-y-8 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto w-full max-w-7xl space-y-8">
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
             {error}
