@@ -1,7 +1,7 @@
 "use client";
 
 import { apiFetch } from "@/lib/api-client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type User = {
   id: number;
@@ -22,21 +22,15 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const t =
-      typeof window !== "undefined" ? localStorage.getItem("gm_token") : null;
-    const u =
+  const [user, setUser] = useState<User | null>(() => {
+    const stored =
       typeof window !== "undefined" ? localStorage.getItem("gm_user") : null;
-    if (t && u) {
-      setToken(t);
-      setUser(JSON.parse(u));
-    }
-    setLoading(false);
-  }, []);
+    return stored ? (JSON.parse(stored) as User) : null;
+  });
+  const [token, setToken] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("gm_token") : null
+  );
+  const [loading] = useState(false);
 
   const persist = (t: string, u: User) => {
     setToken(t);

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api-client";
 import { SiteHeader } from "@/components/site-header";
+import { VehicleCard } from "@/components/vehicle-card";
 import {
   Table,
   TableBody,
@@ -13,6 +14,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 type Vehicle = {
@@ -31,6 +35,18 @@ export default function VehiclesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [draft, setDraft] = useState<Omit<Vehicle, "id" | "status"> & { status?: string }>(
+    {
+      name: "",
+      plate_number: "",
+      brand: "",
+      model: "",
+      year: new Date().getFullYear(),
+      current_odometer: 0,
+      status: "active",
+    }
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -81,8 +97,28 @@ export default function VehiclesPage() {
             </div>
           )}
 
-          <Card className="w-full rounded-2xl border-gm-border bg-gm-card px-4 py-3 md:px-6 md:py-4">
-            <div className="overflow-x-auto">
+          <Card className="w-full rounded-2xl border-gm-border bg-gm-card px-4 py-4 md:px-6 md:py-5">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-white">Fleet inventory</p>
+                <p className="text-xs text-gm-muted">{vehicles.length} vehicles loaded</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gm-border text-white"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  + Add vehicle
+                </Button>
+                <Button variant="ghost" size="sm" className="text-gm-muted">
+                  Export CSV
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 hidden overflow-x-auto md:block">
               <Table className="w-full table-auto">
                 <TableHeader>
                   <TableRow>
@@ -98,7 +134,6 @@ export default function VehiclesPage() {
                 </TableHeader>
 
                 <TableBody>
-                  {/* Loading skeleton */}
                   {loading &&
                     Array.from({ length: 4 }).map((_, i) => (
                       <TableRow key={i} className="animate-pulse">
@@ -110,33 +145,24 @@ export default function VehiclesPage() {
                       </TableRow>
                     ))}
 
-                  {/* Empty state */}
                   {!loading && vehicles.length === 0 && (
                     <TableRow>
                       <TableCell
                         colSpan={8}
                         className="h-24 text-center text-sm text-gm-muted"
                       >
-                        No vehicles found. Make sure your backend{" "}
-                        <code>/vehicles</code> returns a list.
+                        No vehicles found. Make sure your backend <code>/vehicles</code> returns a list.
                       </TableCell>
                     </TableRow>
                   )}
 
-                  {/* Data rows */}
                   {!loading &&
                     vehicles.length > 0 &&
                     vehicles.map((v) => (
                       <TableRow key={v.id}>
-                        <TableCell className="font-mono text-xs">
-                          {v.id}
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          {v.name}
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          {v.plate_number || "-"}
-                        </TableCell>
+                        <TableCell className="font-mono text-xs">{v.id}</TableCell>
+                        <TableCell className="whitespace-nowrap">{v.name}</TableCell>
+                        <TableCell className="whitespace-nowrap">{v.plate_number || "-"}</TableCell>
                         <TableCell>{v.brand || "-"}</TableCell>
                         <TableCell>{v.model || "-"}</TableCell>
                         <TableCell>{v.year || "-"}</TableCell>
@@ -156,9 +182,126 @@ export default function VehiclesPage() {
                 </TableBody>
               </Table>
             </div>
+
+            <div className="mt-4 grid gap-3 md:hidden">
+              {loading &&
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="h-24 rounded-xl border border-gm-border/60 bg-gm-border/20 animate-pulse" />
+                ))}
+              {!loading &&
+                vehicles.map((v) => (
+                  <VehicleCard
+                    key={v.id}
+                    id={v.id}
+                    name={v.name}
+                    plate={v.plate_number}
+                    brand={v.brand}
+                    model={v.model}
+                    year={v.year}
+                    odometer={v.current_odometer}
+                    status={v.status}
+                  />
+                ))}
+            </div>
           </Card>
         </div>
       </main>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-gm-card text-white">
+          <DialogHeader>
+            <DialogTitle>Add a vehicle</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3 text-sm">
+            <div className="grid gap-1">
+              <label className="text-gm-muted">Name</label>
+              <Input
+                value={draft.name}
+                onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+                className="border-gm-border bg-black/30 text-white"
+              />
+            </div>
+            <div className="grid gap-1 md:grid-cols-2 md:gap-3">
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Plate</label>
+                <Input
+                  value={draft.plate_number ?? ""}
+                  onChange={(e) => setDraft((d) => ({ ...d, plate_number: e.target.value }))}
+                  className="border-gm-border bg-black/30 text-white"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Brand</label>
+                <Input
+                  value={draft.brand ?? ""}
+                  onChange={(e) => setDraft((d) => ({ ...d, brand: e.target.value }))}
+                  className="border-gm-border bg-black/30 text-white"
+                />
+              </div>
+            </div>
+            <div className="grid gap-1 md:grid-cols-3 md:gap-3">
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Model</label>
+                <Input
+                  value={draft.model ?? ""}
+                  onChange={(e) => setDraft((d) => ({ ...d, model: e.target.value }))}
+                  className="border-gm-border bg-black/30 text-white"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Year</label>
+                <Input
+                  type="number"
+                  value={draft.year ?? ""}
+                  onChange={(e) => setDraft((d) => ({ ...d, year: Number(e.target.value) }))}
+                  className="border-gm-border bg-black/30 text-white"
+                />
+              </div>
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Odometer (km)</label>
+                <Input
+                  type="number"
+                  value={draft.current_odometer ?? ""}
+                  onChange={(e) => setDraft((d) => ({ ...d, current_odometer: Number(e.target.value) }))}
+                  className="border-gm-border bg-black/30 text-white"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gm-muted"
+                onClick={() => setDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                className="bg-gm-primary text-black hover:bg-gm-primary/90"
+                onClick={() => {
+                  setVehicles((prev) => [
+                    ...prev,
+                    {
+                      id: prev.length + 1,
+                      name: draft.name || "New vehicle",
+                      plate_number: draft.plate_number,
+                      brand: draft.brand,
+                      model: draft.model,
+                      year: draft.year,
+                      current_odometer: draft.current_odometer,
+                      status: draft.status || "active",
+                    },
+                  ]);
+                  setDialogOpen(false);
+                }}
+              >
+                Save vehicle
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
