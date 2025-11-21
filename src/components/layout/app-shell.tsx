@@ -72,23 +72,30 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Main area */}
       <div className="flex-1 flex flex-col">
-        <header className="h-14 border-b border-gm-border flex items-center justify-between px-4 bg-black/40 backdrop-blur-md">
-          <h1 className="text-sm font-medium text-gm-muted">
-            Welcome back,{" "}
-            <span className="text-white font-semibold">{user.full_name}</span>
-          </h1>
-          <div className="flex items-center gap-3">
-            <span className="text-xs px-2 py-1 rounded-full bg-gm-card text-gm-muted uppercase">
-              {user.role}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gm-border text-gm-muted hover:bg-gm-card"
-              onClick={() => logout()}
-            >
-              Logout
-            </Button>
+        <header className="sticky top-0 z-30 border-b border-gm-border/70 bg-black/60 backdrop-blur-xl">
+          <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-7 xl:px-8">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-gm-muted">
+                Fleet Suite
+              </div>
+              <h1 className="text-base font-semibold text-white">
+                Welcome back, <span className="text-gm-accent">{user.full_name}</span>
+              </h1>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-gm-muted">
+                <span className="h-2 w-2 rounded-full bg-gradient-to-br from-gm-primary to-gm-secondary" />
+                {user.role}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gm-border bg-white/5 text-white transition hover:-translate-y-0.5 hover:bg-white/10"
+                onClick={() => logout()}
+              >
+                Logout
+              </Button>
+            </div>
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6 bg-gradient-to-br from-gm-bg via-black to-gm-bg">

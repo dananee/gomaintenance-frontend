@@ -3,16 +3,17 @@
 import {
   DndContext,
   DragEndEvent,
+  DragOverlay,
   DragStartEvent,
   MouseSensor,
   TouchSensor,
   UniqueIdentifier,
+  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
-import { restrictToParentElement } from "@dnd-kit/modifiers";
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +65,10 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
 
     const activeContainer = findContainer(active.id);
     const overContainer = findContainer(over.id);
@@ -80,6 +84,7 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
       } as WorkOrdersKanbanProps["items"];
       setBoard(updated);
       onChange?.(updated);
+      setActiveId(null);
       return;
     }
 
@@ -98,6 +103,7 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
 
     setBoard(updated);
     onChange?.(updated);
+    setActiveId(null);
   };
 
   const findContainer = (id: UniqueIdentifier) => {
@@ -111,46 +117,63 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
       sensors={sensors}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      modifiers={[restrictToParentElement]}
     >
       <div className="grid gap-4 lg:grid-cols-4">
         {columns.map((column) => (
-          <Card
-            key={column.key}
-            className="flex min-h-[360px] flex-col rounded-2xl border-gm-border bg-white/85 shadow-gm-soft"
-          >
-            <div className="flex items-center justify-between border-b border-gm-border/70 px-3 py-3 text-sm font-semibold text-foreground">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-gm-primary to-gm-secondary" />
-                <span>{column.title}</span>
-              </div>
-              <Badge variant="outline" className="border-gm-border bg-gm-panel text-gm-secondary">
-                {board[column.key].length} items
-              </Badge>
-            </div>
-            <div className="h-full overflow-y-auto">
-              <div className="flex flex-1 flex-col gap-3 p-3">
-                <SortableContext items={board[column.key].map((c) => c.id)} strategy={rectSortingStrategy}>
-                  {board[column.key].map((card) => (
-                    <KanbanSortableCard key={card.id} id={card.id}>
-                      <KanbanCard card={card} />
-                    </KanbanSortableCard>
-                  ))}
-                </SortableContext>
-              </div>
-            </div>
-          </Card>
+          <DroppableColumn key={column.key} column={column} count={board[column.key].length}>
+            <SortableContext items={board[column.key].map((c) => c.id)} strategy={rectSortingStrategy}>
+              {board[column.key].map((card) => (
+                <KanbanSortableCard key={card.id} id={card.id}>
+                  <KanbanCard card={card} />
+                </KanbanSortableCard>
+              ))}
+            </SortableContext>
+          </DroppableColumn>
         ))}
       </div>
 
-      {activeCard && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-start p-6 md:p-12">
+      <DragOverlay dropAnimation={{ duration: 180, easing: "ease-out" }}>
+        {activeCard ? (
           <div className="w-72 rounded-2xl border border-gm-primary/40 bg-white shadow-2xl">
             <KanbanCard card={activeCard} floating />
           </div>
-        </div>
-      )}
+        ) : null}
+      </DragOverlay>
     </DndContext>
+  );
+}
+
+function DroppableColumn({
+  column,
+  count,
+  children,
+}: {
+  column: (typeof columns)[number];
+  count: number;
+  children: ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: column.key });
+
+  return (
+    <Card
+      ref={setNodeRef}
+      className={`flex min-h-[360px] flex-col rounded-2xl border-gm-border bg-white/90 shadow-gm-soft transition ${
+        isOver ? "border-gm-primary/60 shadow-gm" : ""
+      }`}
+    >
+      <div className="flex items-center justify-between border-b border-gm-border/70 px-4 py-3 text-sm font-semibold text-foreground">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-gm-primary to-gm-secondary" />
+          <span>{column.title}</span>
+        </div>
+        <Badge variant="outline" className="border-gm-border bg-gm-panel text-gm-secondary">
+          {count} {count === 1 ? "item" : "items"}
+        </Badge>
+      </div>
+      <div className={`h-full overflow-y-auto ${isOver ? "bg-gm-panel/50" : ""}`}>
+        <div className="flex flex-1 flex-col gap-3 p-3">{children}</div>
+      </div>
+    </Card>
   );
 }
 
