@@ -116,13 +116,13 @@ export default function WorkOrdersPage() {
   );
 
   return (
-    <>
+    <div className="flex flex-1 flex-col">
       <SiteHeader
         title="Work Orders"
         description="Prioritize, assign, and track maintenance tasks across the fleet."
       />
 
-      <main className="flex-1 space-y-6 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10">
+      <div className="flex-1 space-y-6 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
         <div className="flex flex-col gap-3 rounded-2xl border border-gm-border bg-gm-card/40 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-2 text-sm text-gm-muted">
             <Badge className="rounded-full bg-gm-primary/10 text-gm-primary">
@@ -235,8 +235,8 @@ export default function WorkOrdersPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-    </>
+      </div>
+    </div>
   );
 
   function findStatus(id: string | number) {

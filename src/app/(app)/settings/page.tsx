@@ -22,13 +22,13 @@ export default function SettingsPage() {
   });
 
   return (
-    <>
+    <div className="flex flex-1 flex-col">
       <SiteHeader
         title="Settings"
         description="Manage your profile and company defaults."
       />
 
-      <main className="flex-1 space-y-6 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10">
+      <div className="flex-1 space-y-6 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <Card className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
             <div className="flex items-center gap-2 text-foreground">
@@ -136,7 +136,7 @@ export default function SettingsPage() {
             )}
           </div>
         </Card>
-      </main>
-    </>
+      </div>
+    </div>
   );
 }

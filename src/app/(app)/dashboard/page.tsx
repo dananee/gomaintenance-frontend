@@ -170,14 +170,14 @@ export default function DashboardPage() {
   );
 
   return (
-    <>
+    <div className="flex flex-1 flex-col">
       <SiteHeader
         title="Dashboard"
         description="Monitor fleet health and maintenance activity."
         userName={user?.full_name ?? "User"}
       />
 
-      <main className="flex-1 space-y-8 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10">
+      <div className="flex-1 space-y-8 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
             {error}
@@ -202,7 +202,7 @@ export default function DashboardPage() {
             loading={loading}
           />
         </div>
-      </main>
-    </>
+      </div>
+    </div>
   );
 }

@@ -88,13 +88,13 @@ export default function VehiclesPage() {
   };
 
   return (
-    <>
+    <div className="flex flex-1 flex-col">
       <SiteHeader
         title="Vehicles"
         description="All vehicles synced from your GoMaintenance backend."
       />
 
-      <main className="flex-1 overflow-x-hidden px-4 py-6 md:px-6 md:py-8 lg:px-10 lg:py-10">
+      <div className="flex-1 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4">
           {error && (
             <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
@@ -224,7 +224,7 @@ export default function VehiclesPage() {
             </div>
           </Card>
         </div>
-      </main>
+      </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-gm-card text-foreground">
@@ -336,6 +336,6 @@ export default function VehiclesPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
