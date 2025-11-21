@@ -1,69 +1,59 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 export type VehicleCardProps = {
-  id: number;
-  name: string;
-  plate?: string | null;
-  brand?: string | null;
-  model?: string | null;
-  year?: number | null;
-  odometer?: number | null;
-  status: string;
+  title: string;
+  subtitle?: string;
+  status?: string;
+  mileage?: string;
+  actions?: Array<{ label: string; onClick: () => void }>;
 };
 
-export function VehicleCard({
-  id,
-  name,
-  plate,
-  brand,
-  model,
-  year,
-  odometer,
-  status,
-}: VehicleCardProps) {
-  const statusTone = statusClass(status);
-
+export function VehicleCard({ title, subtitle, status, mileage, actions }: VehicleCardProps) {
   return (
-    <Card className="flex flex-col gap-3 rounded-2xl border-gm-border bg-gm-card px-4 py-3 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div className="text-sm font-semibold text-white">{name}</div>
-        <Badge
-          variant="outline"
-          className={cn(
-            "rounded-full border px-2 py-0.5 text-[11px] uppercase tracking-wide",
-            statusTone
-          )}
-        >
-          {status}
-        </Badge>
+    <Card className="flex flex-col gap-3 rounded-2xl border-gm-border bg-white/90 px-4 py-4 shadow-gm-soft">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          {subtitle && <p className="text-xs text-gm-muted">{subtitle}</p>}
+        </div>
+        {status && (
+          <Badge variant="outline" className={statusStyle(status)}>
+            {status}
+          </Badge>
+        )}
       </div>
+
+      <Separator className="border-gm-border/80" />
 
       <div className="flex flex-wrap gap-3 text-xs text-gm-muted">
-        <span className="rounded-lg bg-black/30 px-2 py-1 font-mono text-[11px]">
-          #{id}
-        </span>
-        <span className="rounded-lg bg-black/30 px-2 py-1">
-          Plate: {plate || "—"}
-        </span>
-        <span className="rounded-lg bg-black/30 px-2 py-1">
-          {brand || ""} {model || ""}
-        </span>
-        <span className="rounded-lg bg-black/30 px-2 py-1">{year || "-"}</span>
-        <span className="rounded-lg bg-black/30 px-2 py-1">
-          Odo: {odometer ? `${Math.round(odometer)} km` : "-"}
-        </span>
+        {mileage && <span className="rounded-full bg-gm-panel px-2 py-1">Mileage: {mileage}</span>}
+        {status && <span className="rounded-full bg-gm-primary/10 px-2 py-1 text-gm-secondary">Service {status}</span>}
       </div>
+
+      {actions && actions.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {actions.map((action) => (
+            <Button
+              key={action.label}
+              size="sm"
+              variant="outline"
+              onClick={action.onClick}
+              className="border-gm-border text-foreground hover:border-gm-primary hover:text-gm-secondary"
+            >
+              {action.label}
+            </Button>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
 
-function statusClass(status: string) {
-  const s = status.toLowerCase();
-  if (s === "active") return "border-emerald-500/40 text-emerald-200 bg-emerald-500/10";
-  if (s === "maintenance") return "border-amber-500/40 text-amber-200 bg-amber-500/10";
-  if (s === "out_of_service" || s === "inactive")
-    return "border-red-500/40 text-red-200 bg-red-500/10";
-  return "border-gm-border text-gm-muted bg-black/30";
+function statusStyle(status: string) {
+  if (status === "active") return "bg-gm-success/10 text-gm-success border-gm-success/30";
+  if (status === "critical") return "bg-gm-danger/10 text-gm-danger border-gm-danger/30";
+  return "border-gm-border text-gm-muted bg-gm-panel";
 }

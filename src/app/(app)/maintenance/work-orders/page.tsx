@@ -125,7 +125,7 @@ export default function WorkOrdersPage() {
             <Badge className="rounded-full bg-gm-primary/10 text-gm-primary">
               18 open
             </Badge>
-            <Badge className="rounded-full border border-gm-border bg-black/30 text-white">
+            <Badge className="rounded-full border border-gm-border bg-gm-panel text-foreground">
               SLA: 6 due today
             </Badge>
             <span className="hidden text-xs text-gm-muted md:inline">
@@ -133,10 +133,10 @@ export default function WorkOrdersPage() {
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2 border-gm-border text-white">
+            <Button variant="outline" size="sm" className="gap-2 border-gm-border text-foreground">
               <Filter className="h-4 w-4" /> Filters
             </Button>
-            <Button variant="outline" size="sm" className="gap-2 border-gm-border text-white">
+            <Button variant="outline" size="sm" className="gap-2 border-gm-border text-foreground">
               <CalendarClock className="h-4 w-4" />
               Plan calendar
             </Button>
@@ -148,7 +148,7 @@ export default function WorkOrdersPage() {
 
         <Tabs defaultValue="kanban" className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <TabsList className="rounded-xl bg-black/30">
+            <TabsList className="rounded-xl bg-gm-panel">
               <TabsTrigger value="kanban" className="flex items-center gap-2">
                 <LayoutGrid className="h-4 w-4" /> Kanban
               </TabsTrigger>
@@ -161,7 +161,7 @@ export default function WorkOrdersPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search work orders"
-                className="rounded-xl border-gm-border bg-gm-card text-sm text-white"
+                className="rounded-xl border-gm-border bg-gm-card text-sm text-foreground"
               />
               <Button variant="outline" size="icon" className="border-gm-border text-gm-muted">
                 <ArrowUpDown className="h-4 w-4" />
@@ -176,7 +176,7 @@ export default function WorkOrdersPage() {
           <TabsContent value="table">
             <Card className="overflow-hidden rounded-2xl border-gm-border bg-gm-card">
               <Table>
-                <TableHeader className="bg-black/30">
+                <TableHeader className="bg-gm-panel">
                   <TableRow>
                     <TableHead>Order</TableHead>
                     <TableHead>Vehicle</TableHead>
@@ -188,8 +188,8 @@ export default function WorkOrdersPage() {
                 </TableHeader>
                 <TableBody>
                   {tableRows.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-black/30">
-                      <TableCell className="font-semibold text-white">{row.code}</TableCell>
+                    <TableRow key={row.id} className="hover:bg-gm-panel">
+                      <TableCell className="font-semibold text-foreground">{row.code}</TableCell>
                       <TableCell className="text-gm-muted">{row.vehicle}</TableCell>
                       <TableCell className="text-gm-muted">{row.title}</TableCell>
                       <TableCell>

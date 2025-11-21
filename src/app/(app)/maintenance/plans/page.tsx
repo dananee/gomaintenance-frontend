@@ -47,7 +47,7 @@ export default function MaintenancePlansPage() {
           <Card className="rounded-2xl border-gm-border bg-gm-card/50 p-5">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold text-white">Template library</p>
+                <p className="text-sm font-semibold text-foreground">Template library</p>
                 <p className="text-xs text-gm-muted">{coverage}</p>
               </div>
               <Button className="gap-2 bg-gm-primary text-black hover:bg-gm-primary/90">
@@ -59,23 +59,23 @@ export default function MaintenancePlansPage() {
               {templates.map((tpl) => (
                 <Card
                   key={tpl.id}
-                  className="rounded-2xl border-gm-border/70 bg-black/30 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-gm-primary/60"
+                  className="rounded-2xl border-gm-border/70 bg-gm-panel p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-gm-primary/60"
                 >
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-white">
+                      <div className="flex items-center gap-2 text-foreground">
                         <ClipboardList className="h-4 w-4 text-gm-primary" />
                         <span className="font-semibold">{tpl.name}</span>
                       </div>
                       <p className="text-xs text-gm-muted">{tpl.vehicles}</p>
                       <div className="flex flex-wrap gap-2 text-[11px] uppercase tracking-wide text-gm-muted">
-                        <Badge className="border-gm-border bg-gm-border/10 text-white">{tpl.interval}</Badge>
-                        <Badge className="border-gm-border bg-gm-border/10 text-white">{tpl.operations.length} ops</Badge>
-                        <Badge className="border-gm-border bg-gm-border/10 text-white">{tpl.parts.length} parts</Badge>
+                        <Badge className="border-gm-border bg-gm-border/10 text-foreground">{tpl.interval}</Badge>
+                        <Badge className="border-gm-border bg-gm-border/10 text-foreground">{tpl.operations.length} ops</Badge>
+                        <Badge className="border-gm-border bg-gm-border/10 text-foreground">{tpl.parts.length} parts</Badge>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gm-muted">
-                      <Button variant="ghost" size="sm" className="text-gm-muted hover:text-white">
+                      <Button variant="ghost" size="sm" className="text-gm-muted hover:text-foreground">
                         <Save className="h-4 w-4" /> Save
                       </Button>
                       <Button variant="ghost" size="sm" className="text-gm-muted hover:text-red-300">
@@ -89,7 +89,7 @@ export default function MaintenancePlansPage() {
                       <p className="text-xs uppercase tracking-wide text-gm-muted">Operations</p>
                       <div className="flex flex-wrap gap-2">
                         {tpl.operations.map((op) => (
-                          <Badge key={op} className="rounded-full bg-black/40 text-white">
+                          <Badge key={op} className="rounded-full bg-gm-panel text-foreground">
                             <Wrench className="mr-1 h-3 w-3" /> {op}
                           </Badge>
                         ))}
@@ -99,7 +99,7 @@ export default function MaintenancePlansPage() {
                       <p className="text-xs uppercase tracking-wide text-gm-muted">Spare parts</p>
                       <div className="flex flex-wrap gap-2">
                         {tpl.parts.map((part) => (
-                          <Badge key={part} className="rounded-full bg-black/40 text-white">
+                          <Badge key={part} className="rounded-full bg-gm-panel text-foreground">
                             {part}
                           </Badge>
                         ))}
@@ -112,11 +112,11 @@ export default function MaintenancePlansPage() {
           </Card>
 
           <Card className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
-            <p className="text-sm font-semibold text-white">Create template</p>
+            <p className="text-sm font-semibold text-foreground">Create template</p>
             <p className="text-xs text-gm-muted">Draft a reusable maintenance recipe.</p>
 
             <Tabs defaultValue="details" className="mt-4">
-              <TabsList className="rounded-xl bg-black/30">
+              <TabsList className="rounded-xl bg-gm-panel">
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="operations">Operations</TabsTrigger>
                 <TabsTrigger value="parts">Spare parts</TabsTrigger>
@@ -126,19 +126,19 @@ export default function MaintenancePlansPage() {
                   placeholder="Template name"
                   value={draft.name}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
                 <Input
                   placeholder="Interval (e.g., 15,000 km or 90 days)"
                   value={draft.interval}
                   onChange={(e) => setDraft({ ...draft, interval: e.target.value })}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
                 <Input
                   placeholder="Applicable vehicles"
                   value={draft.vehicles}
                   onChange={(e) => setDraft({ ...draft, vehicles: e.target.value })}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </TabsContent>
               <TabsContent value="operations" className="space-y-3 pt-3 text-sm">
@@ -147,7 +147,7 @@ export default function MaintenancePlansPage() {
                   placeholder="Oil change, Brake check, ..."
                   value={draft.operations}
                   onChange={(e) => setDraft({ ...draft, operations: e.target.value })}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </TabsContent>
               <TabsContent value="parts" className="space-y-3 pt-3 text-sm">
@@ -156,7 +156,7 @@ export default function MaintenancePlansPage() {
                   placeholder="Oil filter, Brake cleaner"
                   value={draft.parts}
                   onChange={(e) => setDraft({ ...draft, parts: e.target.value })}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </TabsContent>
             </Tabs>
