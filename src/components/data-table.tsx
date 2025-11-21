@@ -23,15 +23,15 @@ export function DataTable<T extends Record<string, unknown>>({
   loading,
 }: DataTableProps<T>) {
   return (
-    <Card className="overflow-hidden rounded-2xl border-gm-border bg-white/90 shadow-gm-soft">
-      <div className="border-b border-gm-border/70 bg-gradient-to-r from-white to-gm-panel/40 px-4 py-3">
+    <Card className="overflow-hidden rounded-xl border-border bg-card shadow-sm">
+      <div className="border-b border-border/70 bg-card/80 px-6 py-4">
         {title && (
           <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col">
               <p className="text-sm font-semibold text-foreground">{title}</p>
-              {description && <p className="text-xs text-gm-muted">{description}</p>}
+              {description && <p className="text-xs text-muted-foreground">{description}</p>}
             </div>
-            <span className="rounded-full bg-gm-primary/10 px-2 py-1 text-[11px] font-semibold uppercase text-gm-secondary">
+            <span className="rounded-full bg-surface-2 px-3 py-1 text-[11px] font-semibold uppercase text-foreground ring-1 ring-border/60">
               Live
             </span>
           </div>
@@ -39,24 +39,24 @@ export function DataTable<T extends Record<string, unknown>>({
       </div>
 
       {loading ? (
-        <div className="space-y-2 px-4 py-6">
+        <div className="space-y-2 px-6 py-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-9 w-full animate-pulse rounded-lg bg-gm-panel" />
+            <div key={i} className="h-9 w-full animate-pulse rounded-lg bg-muted/70" />
           ))}
         </div>
       ) : (
         <div className="overflow-x-auto">
           <Table className="min-w-full">
-            <TableCaption className="text-xs text-gm-muted">
+            <TableCaption className="text-xs text-muted-foreground">
               {data.length === 0
                 ? "No rows to display"
                 : `${data.length} records in view`}
             </TableCaption>
             <TableHeader>
-              <TableRow className="bg-gm-panel/80 text-sm font-semibold text-gm-secondary">
+              <TableRow className="bg-muted/60 text-sm font-semibold text-foreground">
                 {data[0] &&
                   Object.keys(data[0]).map((key) => (
-                    <TableHead key={key} className="px-4 py-3 uppercase tracking-wide">
+                    <TableHead key={key} className="px-6 py-3 uppercase tracking-wide">
                       {key}
                     </TableHead>
                   ))}
@@ -66,10 +66,10 @@ export function DataTable<T extends Record<string, unknown>>({
               {data.map((row, rowIndex) => (
                 <TableRow
                   key={rowIndex}
-                  className="text-sm transition hover:bg-gm-primary/5 even:bg-gm-panel/40"
+                  className="text-sm transition hover:bg-muted/40 even:bg-muted/30"
                 >
                   {Object.keys(row).map((key) => (
-                    <TableCell key={key} className="px-4 py-3 text-gm-muted">
+                    <TableCell key={key} className="px-6 py-3 text-muted-foreground">
                       {String(row[key])}
                     </TableCell>
                   ))}

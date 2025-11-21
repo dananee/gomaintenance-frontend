@@ -122,7 +122,7 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid gap-4 lg:grid-cols-4">
+      <div className="grid gap-6 lg:grid-cols-4">
         {columns.map((column) => (
           <DroppableColumn key={column.key} column={column} count={board[column.key].length}>
             <SortableContext items={board[column.key].map((c) => c.id)} strategy={rectSortingStrategy}>
@@ -138,7 +138,7 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
 
       <DragOverlay dropAnimation={{ duration: 180, easing: "ease-out" }}>
         {activeCard ? (
-          <div className="w-72 rounded-2xl border border-gm-primary/40 bg-white shadow-2xl">
+          <div className="w-72 rounded-xl border border-border/80 bg-card shadow-xl">
             <KanbanCard card={activeCard} floating />
           </div>
         ) : null}
@@ -161,20 +161,20 @@ function DroppableColumn({
   return (
     <Card
       ref={setNodeRef}
-      className={`flex min-h-[360px] flex-col rounded-2xl border-gm-border bg-white/90 shadow-gm-soft transition ${
-        isOver ? "border-gm-primary/60 shadow-gm" : ""
+      className={`flex min-h-[360px] flex-col rounded-xl border-border bg-card shadow-sm transition ${
+        isOver ? "border-primary/50 shadow-md" : ""
       }`}
     >
-      <div className="flex items-center justify-between border-b border-gm-border/70 px-4 py-3 text-sm font-semibold text-foreground">
+      <div className="flex items-center justify-between border-b border-border/70 px-5 py-4 text-sm font-semibold text-foreground">
         <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-gm-primary to-gm-secondary" />
+          <span className="h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-border/50" />
           <span>{column.title}</span>
         </div>
-        <Badge variant="outline" className="border-gm-border bg-gm-panel text-gm-secondary">
+        <Badge variant="outline" className="border-border bg-muted/60 text-foreground ring-1 ring-border/50">
           {count} {count === 1 ? "item" : "items"}
         </Badge>
       </div>
-      <div className={`h-full overflow-y-auto ${isOver ? "bg-gm-panel/50" : ""}`}>
+      <div className={`h-full overflow-y-auto ${isOver ? "bg-muted/40" : ""}`}>
         <div className="flex flex-1 flex-col gap-3 p-3">{children}</div>
       </div>
     </Card>
@@ -183,29 +183,31 @@ function DroppableColumn({
 
 function KanbanCard({ card, floating }: { card: WorkOrderCard; floating?: boolean }) {
   const priorityStyle = {
-    high: "bg-gm-danger/10 text-gm-danger border-gm-danger/40",
-    medium: "bg-gm-accent/15 text-gm-secondary border-gm-accent/50",
-    low: "bg-gm-success/10 text-gm-success border-gm-success/40",
+    high: "bg-red-500/15 text-red-300 border-red-500/50",
+    medium: "bg-amber-400/20 text-foreground border-amber-300/60",
+    low: "bg-emerald-500/15 text-emerald-300 border-emerald-400/50",
   }[card.priority];
 
   return (
     <motion.div
       layout
-      className={`flex flex-col gap-3 rounded-2xl border border-gm-border/80 bg-white/90 p-3 text-sm shadow-gm-soft transition-transform ${
-        floating ? "scale-[1.02]" : "hover:-translate-y-1 hover:shadow-gm"
+      className={`flex flex-col gap-3 rounded-xl border border-border/80 bg-card p-3 text-sm shadow-sm transition-transform ${
+        floating ? "scale-[1.02]" : "hover:-translate-y-1 hover:shadow-md"
       }`}
       whileHover={{ y: -4 }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="rounded-full bg-gm-panel px-3 py-1 text-xs font-semibold text-gm-secondary">{card.code}</span>
-        <Badge className={priorityStyle}>{card.priority}</Badge>
+        <span className="rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-border/40">
+          {card.code}
+        </span>
+        <Badge className={`${priorityStyle} ring-1 ring-border/50`}>{card.priority}</Badge>
       </div>
       <p className="text-base font-semibold text-foreground">{card.title}</p>
-      <div className="flex items-center justify-between text-xs text-gm-muted">
-        <span className="rounded-full bg-gm-panel px-2 py-1">{card.vehicle}</span>
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span className="rounded-full bg-muted/50 px-2 py-1 ring-1 ring-border/40">{card.vehicle}</span>
         <div className="flex items-center gap-2">
-          <Avatar className="h-7 w-7 border border-gm-border/70">
-            <AvatarFallback className="bg-gradient-to-br from-gm-primary to-gm-secondary text-white">
+          <Avatar className="h-8 w-8 ring-1 ring-border/50">
+            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground mix-blend-lighten">
               {card.assignee
                 .split(" ")
                 .map((p) => p[0])
@@ -214,7 +216,7 @@ function KanbanCard({ card, floating }: { card: WorkOrderCard; floating?: boolea
                 .toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="flex items-center gap-2 rounded-full bg-gm-panel px-2 py-1">
+          <div className="flex items-center gap-2 rounded-full bg-surface-2 px-3 py-1 text-foreground ring-1 ring-border/40">
             <span>💬 {card.comments ?? 0}</span>
             <span>📎 {card.attachments ?? 0}</span>
           </div>

@@ -13,24 +13,24 @@ export type VehicleCardProps = {
 
 export function VehicleCard({ title, subtitle, status, mileage, actions }: VehicleCardProps) {
   return (
-    <Card className="flex flex-col gap-3 rounded-2xl border-gm-border bg-white/90 px-4 py-4 shadow-gm-soft">
+    <Card className="flex flex-col gap-4 rounded-xl border-border bg-card px-5 py-5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-semibold text-foreground">{title}</p>
-          {subtitle && <p className="text-xs text-gm-muted">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
         </div>
         {status && (
-          <Badge variant="outline" className={statusStyle(status)}>
+          <Badge variant="outline" className={`${statusStyle(status)} ring-1 ring-border/50`}> 
             {status}
           </Badge>
         )}
       </div>
 
-      <Separator className="border-gm-border/80" />
+      <Separator className="border-border/60" />
 
-      <div className="flex flex-wrap gap-3 text-xs text-gm-muted">
-        {mileage && <span className="rounded-full bg-gm-panel px-2 py-1">Mileage: {mileage}</span>}
-        {status && <span className="rounded-full bg-gm-primary/10 px-2 py-1 text-gm-secondary">Service {status}</span>}
+      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+        {mileage && <span className="rounded-full bg-muted/60 px-3 py-1 ring-1 ring-border/40">Mileage: {mileage}</span>}
+        {status && <span className="rounded-full bg-surface-2 px-3 py-1 text-foreground ring-1 ring-border/40">Service {status}</span>}
       </div>
 
       {actions && actions.length > 0 && (
@@ -41,7 +41,7 @@ export function VehicleCard({ title, subtitle, status, mileage, actions }: Vehic
               size="sm"
               variant="outline"
               onClick={action.onClick}
-              className="border-gm-border text-foreground hover:border-gm-primary hover:text-gm-secondary"
+              className="border-border text-foreground hover:border-primary hover:text-primary"
             >
               {action.label}
             </Button>
@@ -53,7 +53,7 @@ export function VehicleCard({ title, subtitle, status, mileage, actions }: Vehic
 }
 
 function statusStyle(status: string) {
-  if (status === "active") return "bg-gm-success/10 text-gm-success border-gm-success/30";
-  if (status === "critical") return "bg-gm-danger/10 text-gm-danger border-gm-danger/30";
-  return "border-gm-border text-gm-muted bg-gm-panel";
+  if (status === "active") return "bg-green-500/15 text-green-300 border-green-500/50";
+  if (status === "critical") return "bg-destructive/15 text-destructive border-destructive/40";
+  return "border-border text-muted-foreground bg-muted/60";
 }
