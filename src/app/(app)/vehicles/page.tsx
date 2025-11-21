@@ -88,142 +88,127 @@ export default function VehiclesPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col gap-6">
       <SiteHeader
         title="Vehicles"
         description="All vehicles synced from your GoMaintenance backend."
       />
 
-      <div className="flex-1 overflow-auto bg-gradient-to-br from-[#f8fbff] via-[#eef2f8] to-[#e5ebf5] px-4 py-6 md:px-6 md:py-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4">
-          {error && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
-              {error}
-            </div>
-          )}
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
+            {error}
+          </div>
+        )}
 
-          <Card className="w-full rounded-2xl border-gm-border bg-gm-card px-4 py-4 md:px-6 md:py-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Fleet inventory
-                </p>
-                <p className="text-xs text-gm-muted">
-                  {vehicles.length} vehicles loaded
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-gm-border text-foreground"
-                  onClick={() => setDialogOpen(true)}
-                >
-                  + Add vehicle
-                </Button>
-                <Button variant="ghost" size="sm" className="text-gm-muted">
-                  Export CSV
-                </Button>
-              </div>
+        <Card className="w-full rounded-2xl border-gm-border bg-gm-card px-4 py-4 md:px-6 md:py-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Fleet inventory</p>
+              <p className="text-xs text-gm-muted">{vehicles.length} vehicles loaded</p>
             </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gm-border text-foreground"
+                onClick={() => setDialogOpen(true)}
+              >
+                + Add vehicle
+              </Button>
+              <Button variant="ghost" size="sm" className="text-gm-muted">
+                Export CSV
+              </Button>
+            </div>
+          </div>
 
-            <div className="mt-4 hidden overflow-x-auto md:block">
-              <Table className="w-full table-auto">
-                <TableHeader>
+          <div className="mt-4 hidden overflow-x-auto md:block">
+            <Table className="w-full table-auto">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[60px]">ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Plate</TableHead>
+                  <TableHead>Brand</TableHead>
+                  <TableHead>Model</TableHead>
+                  <TableHead className="w-[90px]">Year</TableHead>
+                  <TableHead className="w-[150px]">Odometer</TableHead>
+                  <TableHead className="w-[110px]">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+
+              <TableBody>
+                {loading &&
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <TableRow key={i} className="animate-pulse">
+                      {Array.from({ length: 8 }).map((__, j) => (
+                        <TableCell key={j}>
+                          <div className="h-4 w-full rounded bg-gm-border/60" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+
+                {!loading && vehicles.length === 0 && (
                   <TableRow>
-                    <TableHead className="w-[60px]">ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Plate</TableHead>
-                    <TableHead>Brand</TableHead>
-                    <TableHead>Model</TableHead>
-                    <TableHead className="w-[90px]">Year</TableHead>
-                    <TableHead className="w-[150px]">Odometer</TableHead>
-                    <TableHead className="w-[110px]">Status</TableHead>
+                    <TableCell colSpan={8} className="h-24 text-center text-sm text-gm-muted">
+                      No vehicles found. Make sure your backend{" "}
+                      <code>/vehicles</code> returns a list.
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
+                )}
 
-                <TableBody>
-                  {loading &&
-                    Array.from({ length: 4 }).map((_, i) => (
-                      <TableRow key={i} className="animate-pulse">
-                        {Array.from({ length: 8 }).map((__, j) => (
-                          <TableCell key={j}>
-                            <div className="h-4 w-full rounded bg-gm-border/60" />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-
-                  {!loading && vehicles.length === 0 && (
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        className="h-24 text-center text-sm text-gm-muted"
-                      >
-                        No vehicles found. Make sure your backend{" "}
-                        <code>/vehicles</code> returns a list.
+                {!loading &&
+                  vehicles.length > 0 &&
+                  vehicles.map((v) => (
+                    <TableRow key={v.id}>
+                      <TableCell className="font-mono text-xs">{v.id}</TableCell>
+                      <TableCell className="whitespace-nowrap">{v.name}</TableCell>
+                      <TableCell className="whitespace-nowrap">{v.plate_number || "-"}</TableCell>
+                      <TableCell>{v.brand || "-"}</TableCell>
+                      <TableCell>{v.model || "-"}</TableCell>
+                      <TableCell>{v.year || "-"}</TableCell>
+                      <TableCell>{formatOdo(v.current_odometer)}</TableCell>
+                      <TableCell>
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                            statusClass(v.status)
+                          )}
+                        >
+                          {v.status}
+                        </span>
                       </TableCell>
                     </TableRow>
-                  )}
+                  ))}
+              </TableBody>
+            </Table>
+          </div>
 
-                  {!loading &&
-                    vehicles.length > 0 &&
-                    vehicles.map((v) => (
-                      <TableRow key={v.id}>
-                        <TableCell className="font-mono text-xs">
-                          {v.id}
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          {v.name}
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap">
-                          {v.plate_number || "-"}
-                        </TableCell>
-                        <TableCell>{v.brand || "-"}</TableCell>
-                        <TableCell>{v.model || "-"}</TableCell>
-                        <TableCell>{v.year || "-"}</TableCell>
-                        <TableCell>{formatOdo(v.current_odometer)}</TableCell>
-                        <TableCell>
-                          <span
-                            className={cn(
-                              "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                              statusClass(v.status)
-                            )}
-                          >
-                            {v.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:hidden">
-              {loading &&
-                Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-24 rounded-xl border border-gm-border/60 bg-gm-border/20 animate-pulse"
-                  />
-                ))}
-              {!loading &&
-                vehicles.map((v) => (
-                  <VehicleCard
-                    key={v.id}
-                    id={v.id}
-                    name={v.name}
-                    plate={v.plate_number}
-                    brand={v.brand}
-                    model={v.model}
-                    year={v.year}
-                    odometer={v.current_odometer}
-                    status={v.status}
-                  />
-                ))}
-            </div>
-          </Card>
-        </div>
+          <div className="mt-4 grid gap-3 md:hidden">
+            {loading &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-24 rounded-xl border border-gm-border/60 bg-gm-border/20 animate-pulse"
+                />
+              ))}
+            {!loading &&
+              vehicles.map((v) => (
+                <VehicleCard
+                  key={v.id}
+                  id={v.id}
+                  name={v.name}
+                  plate={v.plate_number}
+                  brand={v.brand}
+                  model={v.model}
+                  year={v.year}
+                  odometer={v.current_odometer}
+                  status={v.status}
+                />
+              ))}
+          </div>
+        </Card>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
