@@ -170,10 +170,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-gm-bg text-white">
-      {/* Sidebar */}
-
-      {/* Main area */}
+    <div className="flex min-h-screen bg-transparent text-foreground">
       <div className="flex flex-1 flex-col">
         <SiteHeader
           title="Dashboard"
@@ -181,9 +178,9 @@ export default function DashboardPage() {
           userName={user?.full_name ?? "User"}
         />
 
-        <main className="flex-1 p-4 md:p-6 lg:p-8 space-y-6">
+        <main className="flex-1 space-y-6 p-4 md:p-6 lg:p-10">
           {error && (
-            <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
               {error}
             </div>
           )}

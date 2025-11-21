@@ -92,7 +92,7 @@ export default function VehiclesPage() {
       <main className="flex-1 p-4 md:p-6 lg:p-8">
         <div className="mx-auto flex max-w-6xl flex-col gap-4">
           {error && (
-            <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
               {error}
             </div>
           )}
@@ -100,14 +100,14 @@ export default function VehiclesPage() {
           <Card className="w-full rounded-2xl border-gm-border bg-gm-card px-4 py-4 md:px-6 md:py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold text-white">Fleet inventory</p>
+                <p className="text-sm font-semibold text-foreground">Fleet inventory</p>
                 <p className="text-xs text-gm-muted">{vehicles.length} vehicles loaded</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-gm-border text-white"
+                  className="border-gm-border text-foreground"
                   onClick={() => setDialogOpen(true)}
                 >
                   + Add vehicle
@@ -208,7 +208,7 @@ export default function VehiclesPage() {
       </main>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="bg-gm-card text-white">
+        <DialogContent className="bg-gm-card text-foreground">
           <DialogHeader>
             <DialogTitle>Add a vehicle</DialogTitle>
           </DialogHeader>
@@ -218,7 +218,7 @@ export default function VehiclesPage() {
               <Input
                 value={draft.name}
                 onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
             </div>
             <div className="grid gap-1 md:grid-cols-2 md:gap-3">
@@ -227,7 +227,7 @@ export default function VehiclesPage() {
                 <Input
                   value={draft.plate_number ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, plate_number: e.target.value }))}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
               <div className="grid gap-1">
@@ -235,7 +235,7 @@ export default function VehiclesPage() {
                 <Input
                   value={draft.brand ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, brand: e.target.value }))}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function VehiclesPage() {
                 <Input
                   value={draft.model ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, model: e.target.value }))}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
               <div className="grid gap-1">
@@ -254,7 +254,7 @@ export default function VehiclesPage() {
                   type="number"
                   value={draft.year ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, year: Number(e.target.value) }))}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
               <div className="grid gap-1">
@@ -263,7 +263,7 @@ export default function VehiclesPage() {
                   type="number"
                   value={draft.current_odometer ?? ""}
                   onChange={(e) => setDraft((d) => ({ ...d, current_odometer: Number(e.target.value) }))}
-                  className="border-gm-border bg-black/30 text-white"
+                  className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
             </div>

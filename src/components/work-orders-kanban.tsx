@@ -13,6 +13,7 @@ import {
 import { arrayMove, SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { restrictToParentElement } from "@dnd-kit/modifiers";
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -100,9 +101,8 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
   };
 
   const findContainer = (id: UniqueIdentifier) => {
-    if (columns.some((c) => c.key === id)) return id as WorkOrdersKanbanProps["items"] extends Record<infer K, unknown>
-      ? K
-      : never;
+    if (columns.some((c) => c.key === id))
+      return id as WorkOrdersKanbanProps["items"] extends Record<infer K, unknown> ? K : never;
     return columns.find((column) => board[column.key].some((item) => item.id === id))?.key;
   };
 
@@ -117,20 +117,20 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
         {columns.map((column) => (
           <Card
             key={column.key}
-            className="flex min-h-[360px] flex-col rounded-2xl border-gm-border bg-gm-card/60 shadow-sm"
+            className="flex min-h-[360px] flex-col rounded-2xl border-gm-border bg-white/85 shadow-gm-soft"
           >
-            <div className="flex items-center justify-between border-b border-gm-border px-3 py-3 text-sm font-semibold text-white">
-              <span>{column.title}</span>
-              <Badge variant="outline" className="border-gm-border bg-black/30 text-gm-muted">
+            <div className="flex items-center justify-between border-b border-gm-border/70 px-3 py-3 text-sm font-semibold text-foreground">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-gm-primary to-gm-secondary" />
+                <span>{column.title}</span>
+              </div>
+              <Badge variant="outline" className="border-gm-border bg-gm-panel text-gm-secondary">
                 {board[column.key].length} items
               </Badge>
             </div>
             <div className="h-full overflow-y-auto">
               <div className="flex flex-1 flex-col gap-3 p-3">
-                <SortableContext
-                  items={board[column.key].map((c) => c.id)}
-                  strategy={rectSortingStrategy}
-                >
+                <SortableContext items={board[column.key].map((c) => c.id)} strategy={rectSortingStrategy}>
                   {board[column.key].map((card) => (
                     <KanbanSortableCard key={card.id} id={card.id}>
                       <KanbanCard card={card} />
@@ -145,7 +145,7 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
 
       {activeCard && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-start p-6 md:p-12">
-          <div className="w-72 rounded-2xl border border-gm-primary/50 bg-gm-card/90 shadow-2xl">
+          <div className="w-72 rounded-2xl border border-gm-primary/40 bg-white shadow-2xl">
             <KanbanCard card={activeCard} floating />
           </div>
         </div>
@@ -155,32 +155,30 @@ export function WorkOrdersKanban({ items, onChange }: WorkOrdersKanbanProps) {
 }
 
 function KanbanCard({ card, floating }: { card: WorkOrderCard; floating?: boolean }) {
+  const priorityStyle = {
+    high: "bg-gm-danger/10 text-gm-danger border-gm-danger/40",
+    medium: "bg-gm-accent/15 text-gm-secondary border-gm-accent/50",
+    low: "bg-gm-success/10 text-gm-success border-gm-success/40",
+  }[card.priority];
+
   return (
-    <div
-      className={`flex flex-col gap-3 rounded-2xl border border-gm-border/80 bg-black/30 p-3 text-sm shadow-sm transition-transform ${
-        floating ? "scale-[1.02]" : "hover:-translate-y-0.5 hover:border-gm-primary/60"
+    <motion.div
+      layout
+      className={`flex flex-col gap-3 rounded-2xl border border-gm-border/80 bg-white/90 p-3 text-sm shadow-gm-soft transition-transform ${
+        floating ? "scale-[1.02]" : "hover:-translate-y-1 hover:shadow-gm"
       }`}
+      whileHover={{ y: -4 }}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold text-white">{card.code}</span>
-        <Badge
-          className={
-            card.priority === "high"
-              ? "bg-red-500/15 text-red-200 border-red-500/40"
-              : card.priority === "medium"
-                ? "bg-amber-500/15 text-amber-200 border-amber-500/40"
-                : "bg-emerald-500/15 text-emerald-200 border-emerald-500/40"
-          }
-        >
-          {card.priority}
-        </Badge>
+        <span className="rounded-full bg-gm-panel px-3 py-1 text-xs font-semibold text-gm-secondary">{card.code}</span>
+        <Badge className={priorityStyle}>{card.priority}</Badge>
       </div>
-      <p className="text-gm-muted">{card.title}</p>
+      <p className="text-base font-semibold text-foreground">{card.title}</p>
       <div className="flex items-center justify-between text-xs text-gm-muted">
-        <span className="rounded-full bg-gm-border/20 px-2 py-1">{card.vehicle}</span>
+        <span className="rounded-full bg-gm-panel px-2 py-1">{card.vehicle}</span>
         <div className="flex items-center gap-2">
-          <Avatar className="h-7 w-7 border border-gm-border/50">
-            <AvatarFallback className="bg-gm-primary text-black">
+          <Avatar className="h-7 w-7 border border-gm-border/70">
+            <AvatarFallback className="bg-gradient-to-br from-gm-primary to-gm-secondary text-white">
               {card.assignee
                 .split(" ")
                 .map((p) => p[0])
@@ -189,12 +187,12 @@ function KanbanCard({ card, floating }: { card: WorkOrderCard; floating?: boolea
                 .toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="flex items-center gap-2">
-            <span className="rounded-lg bg-black/30 px-2 py-1">💬 {card.comments ?? 0}</span>
-            <span className="rounded-lg bg-black/30 px-2 py-1">📎 {card.attachments ?? 0}</span>
+          <div className="flex items-center gap-2 rounded-full bg-gm-panel px-2 py-1">
+            <span>💬 {card.comments ?? 0}</span>
+            <span>📎 {card.attachments ?? 0}</span>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

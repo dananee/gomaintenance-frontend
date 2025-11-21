@@ -23,7 +23,7 @@ export default function SettingsPage() {
       <main className="flex-1 space-y-6 p-4 md:p-6 lg:p-8">
         <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <Card className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
-            <div className="flex items-center gap-2 text-white">
+            <div className="flex items-center gap-2 text-foreground">
               <User className="h-4 w-4 text-gm-primary" />
               <p className="text-sm font-semibold">Profile</p>
             </div>
@@ -32,17 +32,17 @@ export default function SettingsPage() {
               <Input
                 value={profile.name}
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
               <Input
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
               <Input
                 value={profile.role}
                 onChange={(e) => setProfile({ ...profile, role: e.target.value })}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
             </div>
             <div className="mt-4 flex justify-end">
@@ -51,7 +51,7 @@ export default function SettingsPage() {
           </Card>
 
           <Card className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
-            <div className="flex items-center gap-2 text-white">
+            <div className="flex items-center gap-2 text-foreground">
               <Building2 className="h-4 w-4 text-gm-primary" />
               <p className="text-sm font-semibold">Company</p>
             </div>
@@ -60,36 +60,36 @@ export default function SettingsPage() {
               <Input
                 value={company.name}
                 onChange={(e) => setCompany({ ...company, name: e.target.value })}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
               <Input
                 type="number"
                 value={company.fleet}
                 onChange={(e) => setCompany({ ...company, fleet: Number(e.target.value) })}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
               <Input
                 value={company.timezone}
                 onChange={(e) => setCompany({ ...company, timezone: e.target.value })}
-                className="border-gm-border bg-black/30 text-white"
+                className="border-gm-border bg-gm-panel text-foreground"
               />
             </div>
             <div className="mt-4 flex items-center justify-between">
               <Badge className="rounded-full bg-gm-primary/10 text-gm-primary">Enterprise</Badge>
-              <Button variant="outline" className="border-gm-border text-white">Update company</Button>
+              <Button variant="outline" className="border-gm-border text-foreground">Update company</Button>
             </div>
           </Card>
         </div>
 
         <Card className="rounded-2xl border-gm-border bg-gm-card/60 p-5">
-          <div className="flex items-center gap-2 text-white">
+          <div className="flex items-center gap-2 text-foreground">
             <ShieldCheck className="h-4 w-4 text-gm-primary" />
             <p className="text-sm font-semibold">Security</p>
           </div>
           <p className="text-xs text-gm-muted">MFA, SSO and audit log preferences.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {["MFA required", "SSO via SAML", "Audit log retention"].map((item) => (
-              <Card key={item} className="rounded-xl border-gm-border/60 bg-black/30 p-3 text-sm text-white">
+              <Card key={item} className="rounded-xl border-gm-border/60 bg-gm-panel p-3 text-sm text-foreground">
                 <p className="font-semibold">{item}</p>
                 <p className="text-xs text-gm-muted">Enabled</p>
               </Card>
