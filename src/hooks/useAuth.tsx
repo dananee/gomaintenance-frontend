@@ -4,10 +4,23 @@ import { apiFetch } from "@/lib/api-client";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type User = {
-  id: number;
-  email: string;
-  full_name: string;
-  role: string;
+  id?: number | null;
+  email?: string;
+  full_name?: string;
+  role?: string;
+  company_id?: number | null;
+};
+
+type AuthEnvelope<T> = {
+  success: boolean;
+  data?: T;
+  detail?: string;
+};
+
+type AuthResponse = {
+  token: string;
+  company_id?: number;
+  role?: string;
 };
 
 type AuthContextType = {
@@ -65,25 +78,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    const res = await apiFetch<{ access_token: string; user: User }>(
+    const res = await apiFetch<AuthEnvelope<AuthResponse>>(
       "/auth/login",
       {
         method: "POST",
         body: JSON.stringify({ email, password }),
       }
     );
-    persist(res.access_token, res.user);
+
+    if (!res.data?.token) {
+      throw new Error(res.detail || "Authentication failed");
+    }
+
+    persist(res.data.token, {
+      id: res.data.company_id ?? null,
+      company_id: res.data.company_id ?? null,
+      email,
+      full_name: email,
+      role: res.data.role ?? "user",
+    });
   };
 
   const signup = async (email: string, fullName: string, password: string) => {
-    const res = await apiFetch<{ access_token: string; user: User }>(
-      "/auth/signup",
+    const res = await apiFetch<AuthEnvelope<AuthResponse>>(
+      "/auth/register",
       {
         method: "POST",
-        body: JSON.stringify({ email, full_name: fullName, password }),
+        body: JSON.stringify({ email, password, name: fullName }),
       }
     );
-    persist(res.access_token, res.user);
+
+    if (!res.data?.token) {
+      throw new Error(res.detail || "Sign up failed");
+    }
+
+    persist(res.data.token, {
+      id: res.data.company_id ?? null,
+      company_id: res.data.company_id ?? null,
+      email,
+      full_name: fullName,
+      role: res.data.role ?? "admin",
+    });
   };
 
   const logout = () => {

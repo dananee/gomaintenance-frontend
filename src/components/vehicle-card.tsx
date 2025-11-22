@@ -19,7 +19,7 @@ export function VehicleCard({
   actions,
 }: VehicleCardProps) {
   return (
-    <Card className="flex flex-col gap-4 rounded-xl border-border bg-red px-5 py-5 shadow-sm">
+    <Card className="flex flex-col gap-4 rounded-xl border-border bg-card px-5 py-5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-semibold text-foreground">{title}</p>
