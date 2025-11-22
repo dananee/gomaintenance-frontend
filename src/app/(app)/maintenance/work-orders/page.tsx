@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowUpDown,
   CalendarClock,
@@ -33,80 +33,44 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
+import { apiFetch } from "@/lib/api-client";
 
 const columnKeys = ["new", "in_progress", "in_review", "completed"] as const;
 type ColumnKey = (typeof columnKeys)[number];
 
-const sampleBoard: Record<ColumnKey, WorkOrderCard[]> = {
-  new: [
-    {
-      id: "WO-3021",
-      code: "#WO-3021",
-      vehicle: "Ford Transit • 58k km",
-      title: "Brake pads replacement & rotor inspection",
-      priority: "high",
-      assignee: "Alex Johnson",
-      comments: 5,
-      attachments: 2,
-    },
-    {
-      id: "WO-3022",
-      code: "#WO-3022",
-      vehicle: "Volvo FH16 • 210k km",
-      title: "Check coolant leak from radiator",
-      priority: "medium",
-      assignee: "Dana Smith",
-      comments: 1,
-    },
-  ],
-  in_progress: [
-    {
-      id: "WO-3010",
-      code: "#WO-3010",
-      vehicle: "Mercedes Actros • 180k km",
-      title: "Engine oil + filters replacement",
-      priority: "medium",
-      assignee: "Nathan Reyes",
-      comments: 3,
-      attachments: 1,
-    },
-    {
-      id: "WO-3001",
-      code: "#WO-3001",
-      vehicle: "Iveco Daily • 75k km",
-      title: "Diagnose ABS warning light",
-      priority: "high",
-      assignee: "Pat Cooper",
-      comments: 4,
-    },
-  ],
-  in_review: [
-    {
-      id: "WO-2995",
-      code: "#WO-2995",
-      vehicle: "Scania R450 • 320k km",
-      title: "Tire rotation and balancing",
-      priority: "low",
-      assignee: "Alex Johnson",
-      comments: 2,
-    },
-  ],
-  completed: [
-    {
-      id: "WO-2980",
-      code: "#WO-2980",
-      vehicle: "Renault Master • 140k km",
-      title: "DPF regeneration + diagnostics",
-      priority: "medium",
-      assignee: "Floyd Miles",
-      comments: 1,
-      attachments: 1,
-    },
-  ],
+type WorkOrder = {
+  id: number;
+  order_number?: string;
+  vehicle_id?: number | null;
+  order_type?: string | null;
+  status?: string | null;
+  priority?: string | null;
+  reported_date?: string | null;
+  planned_start_date?: string | null;
+};
+
+type Vehicle = {
+  id: number;
+  name: string;
+  plate_number?: string | null;
+};
+
+const emptyBoard: Record<ColumnKey, WorkOrderCard[]> = {
+  new: [],
+  in_progress: [],
+  in_review: [],
+  completed: [],
 };
 
 export default function WorkOrdersPage() {
-  const [board, setBoard] = useState(sampleBoard);
+  const { token } = useAuth();
+  const [board, setBoard] = useState(emptyBoard);
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ColumnKey>("all");
   const [priorityFilter, setPriorityFilter] = useState<"all" | WorkOrderCard["priority"]>("all");
@@ -114,28 +78,69 @@ export default function WorkOrdersPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [newOrder, setNewOrder] = useState({
     title: "",
-    vehicle: "",
+    vehicleId: "",
     priority: "medium" as WorkOrderCard["priority"],
     assignee: "Unassigned",
+    plannedStart: "",
   });
+
+  useEffect(() => {
+    if (!token) return;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const [ordersData, vehiclesData] = await Promise.all([
+          apiFetch<WorkOrder[]>("/maintenance/work-orders", {}, token),
+          apiFetch<Vehicle[]>("/vehicles", {}, token),
+        ]);
+
+        setWorkOrders(Array.isArray(ordersData) ? ordersData : []);
+        setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load work orders");
+        setWorkOrders([]);
+        setVehicles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
+  }, [token]);
+
+  useEffect(() => {
+    setBoard(toBoard(workOrders, vehicles));
+  }, [workOrders, vehicles]);
 
   const filterItem = useCallback(
     (item: WorkOrderCard, columnKey: ColumnKey) => {
-      if (statusFilter !== "all" && statusFilter !== columnKey) return false;
-      if (priorityFilter !== "all" && priorityFilter !== item.priority) return false;
-      const haystack = `${item.code} ${item.vehicle} ${item.title} ${item.assignee}`.toLowerCase();
-      return haystack.includes(search.toLowerCase());
+      if (statusFilter !== "all" && columnKey !== statusFilter) return false;
+      if (priorityFilter !== "all" && item.priority !== priorityFilter)
+        return false;
+      if (search) {
+        const term = search.toLowerCase();
+        return (
+          item.title.toLowerCase().includes(term) ||
+          item.vehicle.toLowerCase().includes(term) ||
+          item.assignee.toLowerCase().includes(term)
+        );
+      }
+      return true;
     },
-    [priorityFilter, search, statusFilter]
+    [statusFilter, priorityFilter, search]
   );
 
   const filteredBoard = useMemo(
     () =>
-      Object.fromEntries(
-        columnKeys.map((column) => [
-          column,
-          board[column].filter((item) => filterItem(item, column)),
-        ])
+      columnKeys.reduce(
+        (acc, column) => ({
+          ...acc,
+          [column]: board[column].filter((item) => filterItem(item, column)),
+        }),
+        { ...board }
       ) as Record<ColumnKey, WorkOrderCard[]>,
     [board, filterItem]
   );
@@ -152,47 +157,97 @@ export default function WorkOrdersPage() {
 
   const handleBoardChange = (nextBoard: Record<ColumnKey, WorkOrderCard[]>) => {
     setBoard((prev) => {
-      const hidden = columnKeys.reduce<Record<ColumnKey, WorkOrderCard[]>>((acc, column) => {
-        acc[column] = prev[column].filter((item) => !filterItem(item, column));
-        return acc;
-      }, { new: [], in_progress: [], in_review: [], completed: [] });
+      const hidden = columnKeys.reduce<Record<ColumnKey, WorkOrderCard[]>>(
+        (acc, column) => {
+          acc[column] = prev[column].filter((item) => !filterItem(item, column));
+          return acc;
+        },
+        { ...emptyBoard }
+      );
 
-      return columnKeys.reduce<Record<ColumnKey, WorkOrderCard[]>>((acc, column) => {
-        acc[column] = [...nextBoard[column], ...hidden[column]];
-        return acc;
-      }, { new: [], in_progress: [], in_review: [], completed: [] });
+      return columnKeys.reduce<Record<ColumnKey, WorkOrderCard[]>>(
+        (acc, column) => {
+          acc[column] = [...nextBoard[column], ...hidden[column]];
+          return acc;
+        },
+        { ...emptyBoard }
+      );
     });
   };
 
   const createNewOrder = () => {
-    const id = `WO-${Math.floor(Math.random() * 9000 + 1000)}`;
-    const card: WorkOrderCard = {
-      id,
-      code: `#${id}`,
-      title: newOrder.title || "New maintenance order",
-      vehicle: newOrder.vehicle || "Unassigned vehicle",
-      priority: newOrder.priority,
-      assignee: newOrder.assignee || "Unassigned",
-      comments: 0,
+    if (!token) return;
+
+    const vehicle_id = newOrder.vehicleId ? Number(newOrder.vehicleId) : undefined;
+
+    const save = async () => {
+      try {
+        setSaving(true);
+        setError(null);
+
+        await apiFetch(
+          "/maintenance/work-orders",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              vehicle_id,
+              order_type: newOrder.title || "Maintenance",
+              status: "open",
+              priority: newOrder.priority,
+              reported_date: new Date().toISOString(),
+              planned_start_date: newOrder.plannedStart
+                ? new Date(newOrder.plannedStart).toISOString()
+                : undefined,
+            }),
+          },
+          token
+        );
+
+        const refreshed = await apiFetch<WorkOrder[]>(
+          "/maintenance/work-orders",
+          {},
+          token
+        );
+
+        setWorkOrders(Array.isArray(refreshed) ? refreshed : []);
+        setNewOrder({
+          title: "",
+          vehicleId: "",
+          priority: "medium",
+          assignee: "Unassigned",
+          plannedStart: "",
+        });
+        setNewOrderOpen(false);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to create work order");
+      } finally {
+        setSaving(false);
+      }
     };
 
-    setBoard((prev) => ({
-      ...prev,
-      new: [card, ...prev.new],
-    }));
-    setNewOrder({ title: "", vehicle: "", priority: "medium", assignee: "Unassigned" });
-    setNewOrderOpen(false);
+    save();
   };
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-gm-soft">
+          {error}
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 rounded-2xl border border-gm-border bg-gm-card/40 p-4 shadow-sm md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap items-center gap-2 text-sm text-gm-muted">
-          <Badge className="rounded-full bg-gm-primary/10 text-gm-primary">18 open</Badge>
-          <Badge className="rounded-full border border-gm-border bg-gm-panel text-foreground">
-            SLA: 6 due today
+          <Badge className="rounded-full bg-gm-primary/10 text-gm-primary">
+            {workOrders.length} open
           </Badge>
-          <span className="hidden text-xs text-gm-muted md:inline">Updated 3 minutes ago</span>
+          <Badge className="rounded-full border border-gm-border bg-gm-panel text-foreground">
+            Loaded {vehicles.length} vehicles
+          </Badge>
+          <span className="hidden text-xs text-gm-muted md:inline">
+            Updated just now
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button
@@ -241,6 +296,14 @@ export default function WorkOrdersPage() {
 
         <TabsContent value="kanban" className="space-y-4">
           <WorkOrdersKanban items={filteredBoard} onChange={handleBoardChange} />
+          {loading && (
+            <p className="text-center text-sm text-gm-muted">Loading work orders…</p>
+          )}
+          {!loading && workOrders.length === 0 && (
+            <p className="text-center text-sm text-gm-muted">
+              No work orders yet. Create one to match your backend /maintenance/work-orders endpoint.
+            </p>
+          )}
         </TabsContent>
 
         <TabsContent value="table">
@@ -277,6 +340,13 @@ export default function WorkOrdersPage() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {!loading && tableRows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-sm text-gm-muted">
+                      No work orders to display.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </Card>
@@ -302,13 +372,19 @@ export default function WorkOrdersPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="order-vehicle">Vehicle</Label>
-              <Input
+              <select
                 id="order-vehicle"
-                value={newOrder.vehicle}
-                onChange={(event) => setNewOrder((prev) => ({ ...prev, vehicle: event.target.value }))}
-                placeholder="Ford Transit • 58k km"
-                className="border-gm-border bg-gm-panel"
-              />
+                value={newOrder.vehicleId}
+                onChange={(event) => setNewOrder((prev) => ({ ...prev, vehicleId: event.target.value }))}
+                className="h-10 rounded-lg border border-gm-border bg-gm-panel px-3 text-sm"
+              >
+                <option value="">Unassigned vehicle</option>
+                {vehicles.map((vehicle) => (
+                  <option key={vehicle.id} value={vehicle.id}>
+                    {vehicleLabel(vehicle)}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">
@@ -340,13 +416,27 @@ export default function WorkOrdersPage() {
                 />
               </div>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="planned-start">Planned start date</Label>
+              <Input
+                id="planned-start"
+                type="date"
+                value={newOrder.plannedStart}
+                onChange={(event) => setNewOrder((prev) => ({ ...prev, plannedStart: event.target.value }))}
+                className="border-gm-border bg-gm-panel"
+              />
+            </div>
           </div>
 
           <DialogFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
             <Button variant="ghost" onClick={() => setNewOrderOpen(false)} className="text-gm-muted">
               Cancel
             </Button>
-            <Button className="bg-gm-primary text-black hover:bg-gm-primary/90" onClick={createNewOrder}>
+            <Button
+              className="bg-gm-primary text-black hover:bg-gm-primary/90"
+              onClick={createNewOrder}
+              disabled={saving}
+            >
               Add work order
             </Button>
           </DialogFooter>
@@ -418,7 +508,6 @@ export default function WorkOrdersPage() {
       </Sheet>
     </div>
   );
-
 }
 
 function priorityTone(priority: WorkOrderCard["priority"]) {
@@ -427,4 +516,62 @@ function priorityTone(priority: WorkOrderCard["priority"]) {
   if (priority === "medium")
     return "bg-amber-500/15 text-amber-200 border-amber-500/40";
   return "bg-emerald-500/15 text-emerald-200 border-emerald-500/40";
+}
+
+function toBoard(orders: WorkOrder[], vehicles: Vehicle[]): Record<ColumnKey, WorkOrderCard[]> {
+  if (!orders || orders.length === 0)
+    return {
+      ...emptyBoard,
+    };
+
+  const vehicleLookup = new Map<number, Vehicle>();
+  vehicles.forEach((v) => vehicleLookup.set(v.id, v));
+
+  const board: Record<ColumnKey, WorkOrderCard[]> = {
+    new: [],
+    in_progress: [],
+    in_review: [],
+    completed: [],
+  };
+
+  orders.forEach((order) => {
+    const column = statusToColumn(order.status);
+    const vehicleName =
+      (order.vehicle_id && vehicleLookup.get(order.vehicle_id)) || undefined;
+
+    const card: WorkOrderCard = {
+      id: order.id,
+      code: order.order_number ? `#${order.order_number}` : `WO-${order.id}`,
+      vehicle: vehicleName ? vehicleLabel(vehicleName) : "Unassigned vehicle",
+      title: order.order_type || "Maintenance",
+      priority: normalizePriority(order.priority),
+      assignee: "Unassigned",
+      comments: 0,
+    };
+
+    board[column].push(card);
+  });
+
+  return board;
+}
+
+function vehicleLabel(vehicle: Vehicle) {
+  return vehicle.plate_number
+    ? `${vehicle.name} (${vehicle.plate_number})`
+    : vehicle.name;
+}
+
+function normalizePriority(priority?: string | null): WorkOrderCard["priority"] {
+  const value = (priority || "").toLowerCase();
+  if (value === "high") return "high";
+  if (value === "low") return "low";
+  return "medium";
+}
+
+function statusToColumn(status?: string | null): ColumnKey {
+  const normalized = (status || "").toLowerCase().replace(/\s+/g, "_");
+  if (normalized === "in_progress") return "in_progress";
+  if (normalized === "in_review") return "in_review";
+  if (normalized === "completed" || normalized === "done") return "completed";
+  return "new";
 }
