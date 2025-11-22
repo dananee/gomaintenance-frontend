@@ -26,13 +26,15 @@ import { apiFetch } from "@/lib/api-client";
 
 type Vehicle = {
   id: number;
-  name: string;
+  internal_code?: string | null;
   plate_number?: string | null;
   brand?: string | null;
   model?: string | null;
   year?: number | null;
-  current_odometer?: number | null;
-  status: string;
+  mileage?: number | null;
+  hours_meter?: number | null;
+  status?: string | null;
+  vehicle_type_id?: number | null;
 };
 
 export default function VehiclesPage() {
@@ -42,15 +44,17 @@ export default function VehiclesPage() {
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draft, setDraft] = useState<
-    Omit<Vehicle, "id" | "status"> & { status?: string }
+    Omit<Vehicle, "id"> & { status?: string | null }
   >({
-    name: "",
+    internal_code: "",
     plate_number: "",
     brand: "",
     model: "",
     year: new Date().getFullYear(),
-    current_odometer: 0,
+    mileage: 0,
+    hours_meter: 0,
     status: "active",
+    vehicle_type_id: 1,
   });
 
   useEffect(() => {
@@ -74,7 +78,11 @@ export default function VehiclesPage() {
     load();
   }, [token]);
 
-  const formatOdo = (v?: number | null) => (v ? `${Math.round(v)} km` : "-");
+  const formatOdo = (v?: number | null) =>
+    typeof v === "number" ? `${Math.round(v)} km` : "-";
+
+  const formatHours = (v?: number | null) =>
+    typeof v === "number" ? `${v} h` : "-";
 
   const statusClass = (status: string) => {
     const s = status.toLowerCase();
@@ -84,7 +92,7 @@ export default function VehiclesPage() {
       return "bg-amber-500/15 text-amber-300 border-amber-500/40";
     if (s === "out_of_service" || s === "inactive")
       return "bg-red-500/15 text-red-300 border-red-500/40";
-    return "bg-gm-card text-gm-muted border-gm-border/60";
+    return "border-gm-border text-gm-muted bg-gm-panel";
   };
 
   return (
@@ -121,12 +129,13 @@ export default function VehiclesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[60px]">ID</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>Code</TableHead>
                 <TableHead>Plate</TableHead>
                 <TableHead>Brand</TableHead>
                 <TableHead>Model</TableHead>
                 <TableHead className="w-[90px]">Year</TableHead>
-                <TableHead className="w-[150px]">Odometer</TableHead>
+                <TableHead className="w-[130px]">Mileage</TableHead>
+                <TableHead className="w-[130px]">Hours</TableHead>
                 <TableHead className="w-[110px]">Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -135,7 +144,7 @@ export default function VehiclesPage() {
               {loading &&
                 Array.from({ length: 4 }).map((_, i) => (
                   <TableRow key={i} className="animate-pulse">
-                    {Array.from({ length: 8 }).map((__, j) => (
+                    {Array.from({ length: 9 }).map((__, j) => (
                       <TableCell key={j}>
                         <div className="h-4 w-full rounded bg-gm-border/60" />
                       </TableCell>
@@ -145,9 +154,8 @@ export default function VehiclesPage() {
 
               {!loading && vehicles.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center text-sm text-gm-muted">
-                    No vehicles found. Make sure your backend{" "}
-                    <code>/vehicles</code> returns a list.
+                  <TableCell colSpan={9} className="h-24 text-center text-sm text-gm-muted">
+                    No vehicles found. Make sure your backend <code>/vehicles</code> returns a list.
                   </TableCell>
                 </TableRow>
               )}
@@ -157,21 +165,28 @@ export default function VehiclesPage() {
                 vehicles.map((v) => (
                   <TableRow key={v.id}>
                     <TableCell className="font-mono text-xs">{v.id}</TableCell>
-                    <TableCell className="whitespace-nowrap">{v.name}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {v.internal_code || v.plate_number || "-"}
+                    </TableCell>
                     <TableCell className="whitespace-nowrap">{v.plate_number || "-"}</TableCell>
                     <TableCell>{v.brand || "-"}</TableCell>
                     <TableCell>{v.model || "-"}</TableCell>
                     <TableCell>{v.year || "-"}</TableCell>
-                    <TableCell>{formatOdo(v.current_odometer)}</TableCell>
+                    <TableCell>{formatOdo(v.mileage)}</TableCell>
+                    <TableCell>{formatHours(v.hours_meter)}</TableCell>
                     <TableCell>
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                          statusClass(v.status)
-                        )}
-                      >
-                        {v.status}
-                      </span>
+                      {v.status ? (
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                            statusClass(v.status)
+                          )}
+                        >
+                          {v.status}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gm-muted">n/a</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -184,17 +199,19 @@ export default function VehiclesPage() {
             Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="h-24 rounded-xl border border-gm-border/60 bg-gm-border/20 animate-pulse"
+                className="h-24 animate-pulse rounded-xl border border-gm-border/60 bg-gm-border/20"
               />
             ))}
           {!loading &&
             vehicles.map((v) => (
               <VehicleCard
                 key={v.id}
-                title={v.name}
-                subtitle={v.plate_number ?? undefined}
-                status={v.status}
-                mileage={formatOdo(v.current_odometer)}
+                title={v.plate_number || v.internal_code || `Vehicle ${v.id}`}
+                subtitle={
+                  [v.brand, v.model].filter(Boolean).join(" ") || undefined
+                }
+                status={v.status || undefined}
+                mileage={formatOdo(v.mileage)}
               />
             ))}
         </div>
@@ -215,10 +232,12 @@ export default function VehiclesPage() {
           {vehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
-              title={vehicle.name}
-              subtitle={vehicle.plate_number ?? undefined}
-              status={vehicle.status}
-              mileage={formatOdo(vehicle.current_odometer)}
+              title={vehicle.plate_number || vehicle.internal_code || `Vehicle ${vehicle.id}`}
+              subtitle={
+                [vehicle.brand, vehicle.model].filter(Boolean).join(" ") || undefined
+              }
+              status={vehicle.status || undefined}
+              mileage={formatOdo(vehicle.mileage)}
             />
           ))}
         </div>
@@ -230,15 +249,17 @@ export default function VehiclesPage() {
             <DialogTitle>Add a vehicle</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3 text-sm">
-            <div className="grid gap-1">
-              <label className="text-gm-muted">Name</label>
-              <Input
-                value={draft.name}
-                onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-                className="border-gm-border bg-gm-panel text-foreground"
-              />
-            </div>
             <div className="grid gap-1 md:grid-cols-2 md:gap-3">
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Internal code</label>
+                <Input
+                  value={draft.internal_code ?? ""}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, internal_code: e.target.value }))
+                  }
+                  className="border-gm-border bg-gm-panel text-foreground"
+                />
+              </div>
               <div className="grid gap-1">
                 <label className="text-gm-muted">Plate</label>
                 <Input
@@ -249,6 +270,8 @@ export default function VehiclesPage() {
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
+            </div>
+            <div className="grid gap-1 md:grid-cols-2 md:gap-3">
               <div className="grid gap-1">
                 <label className="text-gm-muted">Brand</label>
                 <Input
@@ -257,8 +280,6 @@ export default function VehiclesPage() {
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
-            </div>
-            <div className="grid gap-1 md:grid-cols-3 md:gap-3">
               <div className="grid gap-1">
                 <label className="text-gm-muted">Model</label>
                 <Input
@@ -267,6 +288,8 @@ export default function VehiclesPage() {
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
+            </div>
+            <div className="grid gap-1 md:grid-cols-3 md:gap-3">
               <div className="grid gap-1">
                 <label className="text-gm-muted">Year</label>
                 <Input
@@ -279,19 +302,41 @@ export default function VehiclesPage() {
                 />
               </div>
               <div className="grid gap-1">
-                <label className="text-gm-muted">Odometer (km)</label>
+                <label className="text-gm-muted">Mileage (km)</label>
                 <Input
                   type="number"
-                  value={draft.current_odometer ?? ""}
+                  value={draft.mileage ?? ""}
                   onChange={(e) =>
-                    setDraft((d) => ({
-                      ...d,
-                      current_odometer: Number(e.target.value),
-                    }))
+                    setDraft((d) => ({ ...d, mileage: Number(e.target.value) }))
                   }
                   className="border-gm-border bg-gm-panel text-foreground"
                 />
               </div>
+              <div className="grid gap-1">
+                <label className="text-gm-muted">Hours meter</label>
+                <Input
+                  type="number"
+                  value={draft.hours_meter ?? ""}
+                  onChange={(e) =>
+                    setDraft((d) => ({ ...d, hours_meter: Number(e.target.value) }))
+                  }
+                  className="border-gm-border bg-gm-panel text-foreground"
+                />
+              </div>
+            </div>
+            <div className="grid gap-1">
+              <label className="text-gm-muted">Vehicle type ID</label>
+              <Input
+                type="number"
+                value={draft.vehicle_type_id ?? ""}
+                onChange={(e) =>
+                  setDraft((d) => ({
+                    ...d,
+                    vehicle_type_id: Number(e.target.value),
+                  }))
+                }
+                className="border-gm-border bg-gm-panel text-foreground"
+              />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button
@@ -306,20 +351,55 @@ export default function VehiclesPage() {
                 size="sm"
                 className="bg-gm-primary text-black hover:bg-gm-primary/90"
                 onClick={() => {
-                  setVehicles((prev) => [
-                    ...prev,
-                    {
-                      id: prev.length + 1,
-                      name: draft.name || "New vehicle",
-                      plate_number: draft.plate_number,
-                      brand: draft.brand,
-                      model: draft.model,
-                      year: draft.year,
-                      current_odometer: draft.current_odometer,
-                      status: draft.status || "active",
-                    },
-                  ]);
-                  setDialogOpen(false);
+                  const save = async () => {
+                    try {
+                      setLoading(true);
+                      await apiFetch(
+                        "/vehicles",
+                        {
+                          method: "POST",
+                          body: JSON.stringify({
+                            internal_code: draft.internal_code,
+                            plate_number: draft.plate_number,
+                            brand: draft.brand,
+                            model: draft.model,
+                            year: draft.year,
+                            mileage: draft.mileage,
+                            hours_meter: draft.hours_meter,
+                            vehicle_type_id: draft.vehicle_type_id,
+                            status: draft.status,
+                          }),
+                        },
+                        token
+                      );
+
+                      const refreshed = await apiFetch<Vehicle[]>(
+                        "/vehicles",
+                        {},
+                        token
+                      );
+                      setVehicles(Array.isArray(refreshed) ? refreshed : []);
+                      setDialogOpen(false);
+                      setDraft({
+                        internal_code: "",
+                        plate_number: "",
+                        brand: "",
+                        model: "",
+                        year: new Date().getFullYear(),
+                        mileage: 0,
+                        hours_meter: 0,
+                        status: "active",
+                        vehicle_type_id: 1,
+                      });
+                    } catch (err) {
+                      console.error(err);
+                      setError("Failed to save vehicle");
+                    } finally {
+                      setLoading(false);
+                    }
+                  };
+
+                  save();
                 }}
               >
                 Save vehicle

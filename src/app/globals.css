@@ -136,6 +136,12 @@
   --sidebar-ring: #3b82f6;
   --surface-1: #111827;
   --surface-2: rgba(255, 255, 255, 0.04);
+  --gm-bg: #05070f;
+  --gm-panel: #0f172a;
+  --gm-card: #111827;
+  --gm-border: #223042;
+  --gm-muted: #9ca3af;
+  --gm-foreground: #e0e6f1;
 }
 
 @layer base {
