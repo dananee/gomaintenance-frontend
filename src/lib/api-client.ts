@@ -6,23 +6,33 @@ export async function apiFetch<T>(
   options: RequestInit = {},
   token?: string | null
 ): Promise<T> {
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+    });
 
-  if (!res.ok) {
-    throw new Error(await res.text());
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText || `HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    return res.json();
+  } catch (error) {
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      throw new Error(
+        `Unable to connect to API server at ${API_BASE_URL}. Please ensure the backend is running.`
+      );
+    }
+    throw error;
   }
-
-  return res.json();
 }

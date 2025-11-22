@@ -11,16 +11,27 @@ export type VehicleCardProps = {
   actions?: Array<{ label: string; onClick: () => void }>;
 };
 
-export function VehicleCard({ title, subtitle, status, mileage, actions }: VehicleCardProps) {
+export function VehicleCard({
+  title,
+  subtitle,
+  status,
+  mileage,
+  actions,
+}: VehicleCardProps) {
   return (
-    <Card className="flex flex-col gap-4 rounded-xl border-border bg-card px-5 py-5 shadow-sm">
+    <Card className="flex flex-col gap-4 rounded-xl border-border bg-red px-5 py-5 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-semibold text-foreground">{title}</p>
-          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+          {subtitle && (
+            <p className="text-xs text-muted-foreground">{subtitle}</p>
+          )}
         </div>
         {status && (
-          <Badge variant="outline" className={`${statusStyle(status)} ring-1 ring-border/50`}> 
+          <Badge
+            variant="outline"
+            className={`${statusStyle(status)} ring-1 ring-border/50`}
+          >
             {status}
           </Badge>
         )}
@@ -29,8 +40,16 @@ export function VehicleCard({ title, subtitle, status, mileage, actions }: Vehic
       <Separator className="border-border/60" />
 
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-        {mileage && <span className="rounded-full bg-muted/60 px-3 py-1 ring-1 ring-border/40">Mileage: {mileage}</span>}
-        {status && <span className="rounded-full bg-surface-2 px-3 py-1 text-foreground ring-1 ring-border/40">Service {status}</span>}
+        {mileage && (
+          <span className="rounded-full bg-muted/60 px-3 py-1 ring-1 ring-border/40">
+            Mileage: {mileage}
+          </span>
+        )}
+        {status && (
+          <span className="rounded-full bg-surface-2 px-3 py-1 text-foreground ring-1 ring-border/40">
+            Service {status}
+          </span>
+        )}
       </div>
 
       {actions && actions.length > 0 && (
@@ -53,7 +72,9 @@ export function VehicleCard({ title, subtitle, status, mileage, actions }: Vehic
 }
 
 function statusStyle(status: string) {
-  if (status === "active") return "bg-green-500/15 text-green-300 border-green-500/50";
-  if (status === "critical") return "bg-destructive/15 text-destructive border-destructive/40";
+  if (status === "active")
+    return "bg-green-500/15 text-green-300 border-green-500/50";
+  if (status === "critical")
+    return "bg-destructive/15 text-destructive border-destructive/40";
   return "border-border text-muted-foreground bg-muted/60";
 }

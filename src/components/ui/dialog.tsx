@@ -12,7 +12,10 @@ export const DialogClose = DialogPrimitive.Close;
 export const DialogPortal = DialogPrimitive.Portal;
 export const DialogOverlay = DialogPrimitive.Overlay;
 
-export function DialogContent({ className, ...props }: DialogPrimitive.DialogContentProps) {
+export function DialogContent({
+  className,
+  ...props
+}: DialogPrimitive.DialogContentProps) {
   return (
     <DialogPortal>
       <DialogOverlay className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" />
@@ -32,14 +35,36 @@ export function DialogContent({ className, ...props }: DialogPrimitive.DialogCon
   );
 }
 
-export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function DialogHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("mb-4 space-y-1", className)} {...props} />;
 }
 
-export function DialogTitle({ className, ...props }: DialogPrimitive.DialogTitleProps) {
-  return <DialogPrimitive.Title className={cn("text-lg font-semibold", className)} {...props} />;
+export function DialogTitle({
+  className,
+  ...props
+}: DialogPrimitive.DialogTitleProps) {
+  return (
+    <DialogPrimitive.Title
+      className={cn("text-lg font-semibold", className)}
+      {...props}
+    />
+  );
 }
 
-export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2", className)} {...props} />;
+export function DialogFooter({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2",
+        className
+      )}
+      {...props}
+    />
+  );
 }
